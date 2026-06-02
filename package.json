@@ -1,0 +1,28 @@
+{
+  "name": "automatic-maintenance",
+  "version": "1.0.0",
+  "description": "Automatic Maintenance is an autonomous AI agent designed to monitor, diagnose, and optimize systems without constant human intervention. It proactively detects issues, performs routine maintenance tasks, tracks performance metrics, and recommends or executes fixes before problems escalate.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kenGucci/automatic-maintenance.git"
+  },
+  "keywords": [
+    "ai",
+    "maintenance",
+    "monitoring",
+    "automation",
+    "autonomous-agent"
+  ],
+  "author": "kenGucci",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
