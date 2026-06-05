@@ -83,7 +83,7 @@ npm run dev
 python3 dashboard/app.py
 ```
 
-The dashboard will be available at **http://127.0.0.1:5000**
+The dashboard will be available at **http://127.0.0.1:8080**
 
 ## Dashboard
 

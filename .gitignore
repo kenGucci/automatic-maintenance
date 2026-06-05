@@ -49,3 +49,7 @@ logs/
 # OS
 .DS_Store
 Thumbs.db
+
+# Screenshots
+*.screenshot.png
+dashboard_screenshot.png
