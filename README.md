@@ -10,6 +10,7 @@ Automatic Maintenance is an autonomous AI agent designed to monitor, diagnose, a
 - **Alert System** — Real-time alerts with severity levels (info, warning, critical)
 - **Maintenance Scheduling** — Automated log rotation, disk cleanup, security scans, and backups
 - **Web Dashboard** — Full-featured themed UI with dark/light mode for real-time monitoring
+- **Telegram Bot** — Chat with your infrastructure, get status & alerts on Telegram
 - **CrewAI Integration** — Multi-agent orchestration for complex maintenance tasks
 - **GitHub Actions CI/CD** — Daily scheduled maintenance via automated workflows
 
@@ -151,9 +152,23 @@ A daily maintenance workflow runs at **3 AM UTC**:
 
 You can also trigger it manually via `workflow_dispatch`.
 
-## Bot Integration
+## Telegram Bot
 
-See [BOT_SETUP.md](BOT_SETUP.md) for detailed bot configuration, troubleshooting, and security notes.
+Chat with your infrastructure directly from Telegram. The bot responds to commands and natural language:
+
+| Command | Description |
+|---------|-------------|
+| `/start` | Main menu with quick action buttons |
+| `/status` | Agent status & health score |
+| `/metrics` | CPU, Memory, Disk, Network with visual bars |
+| `/alerts` | Recent alerts and warnings |
+| `/diagnostics` | Service health check & latency |
+| `/agents` | CrewAI agent status |
+| `/dashboard` | Link to web dashboard |
+
+You can also ask questions in plain English: *"How's the system?"*, *"Any critical alerts?"*, *"Check CPU"*
+
+See [BOT_SETUP.md](BOT_SETUP.md) for full setup instructions.
 
 ## Configuration
 
@@ -164,6 +179,9 @@ Key environment variables:
 | `CLOUDFLARE_API_TOKEN` | Cloudflare API token for deployment |
 | `MONITORING_INTERVAL` | Metrics collection interval (ms) |
 | `ENVIRONMENT` | Runtime environment (development/production) |
+| `TELEGRAM_BOT_TOKEN` | Telegram bot token from @BotFather |
+| `TELEGRAM_AUTHORIZED_USERS` | Comma-separated Telegram chat IDs |
+| `DASHBOARD_URL` | URL to the web dashboard |
 
 Alert thresholds are configurable in the dashboard Settings page:
 - CPU: warning 70%, critical 90%

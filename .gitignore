@@ -56,3 +56,5 @@ Thumbs.db
 # Screenshots
 *.screenshot.png
 dashboard_screenshot.png
+.vercel-tmp/
+github-repo-screenshot.png
