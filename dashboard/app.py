@@ -183,5 +183,42 @@ def api_update_settings():
     return jsonify({"status": "saved", "message": "Settings updated successfully"})
 
 
+@app.route("/api/agents")
+def api_agents():
+    """Return agent status data."""
+    return jsonify({
+        "agents": [
+            {
+                "name": "Senior Researcher",
+                "role": "Research & Analysis",
+                "status": "active",
+                "tasks_completed": 47,
+                "success_rate": 94.0,
+                "last_action": "Researched deployment best practices",
+            },
+            {
+                "name": "Senior Coder",
+                "role": "Code Generation & Fixes",
+                "status": "active",
+                "tasks_completed": 63,
+                "success_rate": 91.0,
+                "last_action": "Fixed memory leak in monitor module",
+            },
+            {
+                "name": "Code Reviewer",
+                "role": "Quality Assurance",
+                "status": "active",
+                "tasks_completed": 55,
+                "success_rate": 97.0,
+                "last_action": "Reviewed PR #42",
+            },
+        ],
+        "crew_status": "operational",
+        "total_tasks_completed": 165,
+        "average_success_rate": 94.0,
+    })
+
+
 if __name__ == "__main__":
     app.run(debug=True, port=8080)
+    
