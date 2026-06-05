@@ -1,0 +1,4 @@
+flask>=3.0
+crewai>=0.1
+crewai-tools>=0.1
+python-telegram-bot>=21.0

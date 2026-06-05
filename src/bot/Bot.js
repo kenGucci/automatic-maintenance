@@ -7,7 +7,8 @@ const Logger = require('../utils/Logger');
 
 const logger = new Logger('Bot');
 
-class Bot {
+class Bot {safecone
+  
   constructor(config, agent) {
     this.config = config;
     this.agent = agent;

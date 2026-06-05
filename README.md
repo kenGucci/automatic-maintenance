@@ -11,6 +11,7 @@ Automatic Maintenance is an autonomous AI agent designed to monitor, diagnose, a
 - **Maintenance Scheduling** — Automated log rotation, disk cleanup, security scans, and backups
 - **Web Dashboard** — Full-featured themed UI with dark/light mode for real-time monitoring
 - **Telegram Bot** — Chat with your infrastructure, get status & alerts on Telegram
+- **X (Twitter) Bot** — Automated system health updates and alerts on X (@Auto_Mend)
 - **CrewAI Integration** — Multi-agent orchestration for complex maintenance tasks
 - **GitHub Actions CI/CD** — Daily scheduled maintenance via automated workflows
 
@@ -170,6 +171,35 @@ You can also ask questions in plain English: *"How's the system?"*, *"Any critic
 
 See [BOT_SETUP.md](BOT_SETUP.md) for full setup instructions.
 
+## X (Twitter) Bot
+
+Automatically share system health, alerts, and maintenance updates on X via **@Auto_Mend** (official project account):
+
+| Post Type | Description | Example |
+|-----------|-------------|----------|
+| **Health Reports** | System health score and metrics | "✅ Healthy System Health Report - Health Score: 95%" |
+| **Critical Alerts** | Immediate notifications of issues | "🚨 CRITICAL ALERT - CPU usage exceeded 90%" |
+| **Maintenance Updates** | Task completion notifications | "✅ Maintenance Task Complete - Disk Cleanup" |
+| **System Tips** | Best practices and insights | "💡 Tip: Regular log rotation prevents disk space issues" |
+
+### Quick Setup
+
+1. Get X API credentials (see [X_API_SETUP.md](X_API_SETUP.md))
+2. Add credentials to `.env`:
+   ```env
+   X_API_KEY=your-api-key
+   X_API_KEY_SECRET=your-api-secret
+   X_ACCESS_TOKEN=your-access-token
+   X_ACCESS_TOKEN_SECRET=your-access-token-secret
+   X_POST_UPDATES=true
+   ```
+3. Test the bot:
+   ```bash
+   python3 x_bot.py
+   ```
+
+See [X_API_SETUP.md](X_API_SETUP.md) for complete setup instructions.
+
 ## Configuration
 
 Key environment variables:
@@ -194,4 +224,6 @@ ISC
 
 ## Author
 
-kenGucci — [𝕏 @suggestionii](https://x.com/suggestionii)
+**@Auto_Mend** — Official project account on X
+
+Built by **kenGucci** ([𝕏 @suggestionii](https://x.com/suggestionii))
