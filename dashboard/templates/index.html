@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Automatic Maintenance Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/theme.css" />
+</head>
+<body>
+  <div class="app-layout">
+
+    <!-- ========== Sidebar ========== -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-brand-icon">&#9881;</div>
+        <div class="sidebar-brand-text">Auto Maintenance</div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="sidebar-section-title">Dashboard</div>
+        <a class="sidebar-link active" data-page="overview" href="#overview">
+          <span class="sidebar-link-icon">&#9632;</span>
+          <span>Overview</span>
+        </a>
+        <a class="sidebar-link" data-page="monitoring" href="#monitoring">
+          <span class="sidebar-link-icon">&#9650;</span>
+          <span>Monitoring</span>
+        </a>
+        <a class="sidebar-link" data-page="diagnostics" href="#diagnostics">
+          <span class="sidebar-link-icon">&#9888;</span>
+          <span>Diagnostics</span>
+        </a>
+
+        <div class="sidebar-section-title">Configuration</div>
+        <a class="sidebar-link" data-page="settings" href="#settings">
+          <span class="sidebar-link-icon">&#9881;</span>
+          <span>Settings</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="sidebar-status">
+          <span class="sidebar-status-dot"></span>
+          <span>Agent Running</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ========== Main Content ========== -->
+    <main class="main-content">
+
+      <!-- Top Header -->
+      <header class="top-header">
+        <div class="header-left">
+          <h1 class="header-page-title" id="page-title">Overview</h1>
+        </div>
+        <div class="header-right">
+          <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme">
+            <span class="theme-toggle-icon" id="theme-icon">&#9788;</span>
+            <span id="theme-label">Light</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- ========== Page: Overview ========== -->
+      <section class="page-section active" id="page-overview">
+        <div class="content-area">
+          <div class="stats-grid" id="overview-stats">
+            <div class="stat-card">
+              <div class="stat-card-label">Agent Status</div>
+              <div class="stat-card-value" id="stat-agent-status" style="color:var(--color-success)">Running</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-label">Health Score</div>
+              <div class="stat-card-value" id="stat-health-score">--</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-label">Uptime</div>
+              <div class="stat-card-value" id="stat-uptime">--</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-label">Critical Alerts</div>
+              <div class="stat-card-value" id="stat-critical-alerts">--</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-label">Tasks Completed</div>
+              <div class="stat-card-value" id="stat-tasks-completed">--</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-label">Pending Tasks</div>
+              <div class="stat-card-value" id="stat-tasks-pending">--</div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom: var(--spacing-lg);">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Recent Alerts</div>
+                <div class="card-subtitle">Last 2 hours</div>
+              </div>
+            </div>
+            <div class="card-body">
+              <ul class="alert-list" id="overview-alerts">
+                <li class="loading-container"><div class="spinner"></div></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Recent Tasks</div>
+                <div class="card-subtitle">Maintenance activities</div>
+              </div>
+            </div>
+            <div class="card-body">
+              <table class="tasks-table" id="overview-tasks">
+                <thead>
+                  <tr>
+                    <th>Task</th>
+                    <th>Status</th>
+                    <th>Duration</th>
+                    <th>Time</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td colspan="4" class="loading-container"><div class="spinner"></div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== Page: Monitoring ========== -->
+      <section class="page-section" id="page-monitoring">
+        <div class="content-area">
+          <div class="stats-grid" id="monitoring-metrics">
+            <div class="stat-card">
+              <div class="stat-card-label">CPU Usage</div>
+              <div class="stat-card-value" id="metric-cpu">--</div>
+              <div class="stat-card-change positive">&#8593; 2.3%</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-label">Memory Usage</div>
+              <div class="stat-card-value" id="metric-memory">--</div>
+              <div class="stat-card-change negative">&#8595; 1.1%</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-label">Disk Usage</div>
+              <div class="stat-card-value" id="metric-disk">--</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-label">Network In</div>
+              <div class="stat-card-value" id="metric-net-in">--</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-label">Network Out</div>
+              <div class="stat-card-value" id="metric-net-out">--</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-card-label">Processes</div>
+              <div class="stat-card-value" id="metric-processes">--</div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom: var(--spacing-lg);">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Resource Usage</div>
+                <div class="card-subtitle">Current utilization levels</div>
+              </div>
+            </div>
+            <div class="card-body" id="monitoring-bars">
+              <!-- Filled by JS -->
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">CPU & Memory History</div>
+                <div class="card-subtitle">Last 24 hours</div>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="chart-container" id="history-chart">
+                <div class="chart-bars" id="chart-bars-container">
+                  <!-- Filled by JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== Page: Diagnostics ========== -->
+      <section class="page-section" id="page-diagnostics">
+        <div class="content-area">
+          <div class="services-grid" id="diagnostic-services">
+            <!-- Filled by JS -->
+          </div>
+
+          <div class="card" style="margin-bottom: var(--spacing-lg);">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Overall Status</div>
+                <div class="card-subtitle" id="diagnostic-last-run">--</div>
+              </div>
+              <span class="task-status-badge completed" id="diagnostic-overall-badge">Operational</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Recommendations</div>
+                <div class="card-subtitle">Based on diagnostic analysis</div>
+              </div>
+            </div>
+            <div class="card-body">
+              <ul class="recommendation-list" id="diagnostic-recommendations">
+                <li class="loading-container"><div class="spinner"></div></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== Page: Settings ========== -->
+      <section class="page-section" id="page-settings">
+        <div class="content-area">
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Agent Configuration</div>
+                <div class="card-subtitle">Configure monitoring and maintenance behavior</div>
+              </div>
+            </div>
+            <div class="card-body">
+              <form class="settings-form" id="settings-form">
+
+                <div class="form-group">
+                  <div class="form-toggle-row">
+                    <label class="form-label">Auto-Remediation</label>
+                    <label class="toggle-switch">
+                      <input type="checkbox" id="setting-auto-remediation" checked />
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Monitoring Interval (ms)</label>
+                  <input class="form-input" type="number" id="setting-monitoring-interval" value="30000" />
+                </div>
+
+                <div class="form-group">
+                  <div class="form-label">Alert Thresholds (%)</div>
+                  <div class="form-row">
+                    <div>
+                      <label class="form-label" style="font-size:var(--font-size-xs)">CPU Warning</label>
+                      <input class="form-input" type="number" id="setting-cpu-warning" value="70" />
+                    </div>
+                    <div>
+                      <label class="form-label" style="font-size:var(--font-size-xs)">CPU Critical</label>
+                      <input class="form-input" type="number" id="setting-cpu-critical" value="90" />
+                    </div>
+                  </div>
+                  <div class="form-row" style="margin-top:var(--spacing-md)">
+                    <div>
+                      <label class="form-label" style="font-size:var(--font-size-xs)">Memory Warning</label>
+                      <input class="form-input" type="number" id="setting-mem-warning" value="75" />
+                    </div>
+                    <div>
+                      <label class="form-label" style="font-size:var(--font-size-xs)">Memory Critical</label>
+                      <input class="form-input" type="number" id="setting-mem-critical" value="95" />
+                    </div>
+                  </div>
+                  <div class="form-row" style="margin-top:var(--spacing-md)">
+                    <div>
+                      <label class="form-label" style="font-size:var(--font-size-xs)">Disk Warning</label>
+                      <input class="form-input" type="number" id="setting-disk-warning" value="80" />
+                    </div>
+                    <div>
+                      <label class="form-label" style="font-size:var(--font-size-xs)">Disk Critical</label>
+                      <input class="form-input" type="number" id="setting-disk-critical" value="95" />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Notification Channels</label>
+                  <div style="display:flex; gap:var(--spacing-md)">
+                    <label style="display:flex; align-items:center; gap:var(--spacing-sm); font-size:var(--font-size-sm); color:var(--text-secondary); cursor:pointer">
+                      <input type="checkbox" id="setting-notif-email" checked /> Email
+                    </label>
+                    <label style="display:flex; align-items:center; gap:var(--spacing-sm); font-size:var(--font-size-sm); color:var(--text-secondary); cursor:pointer">
+                      <input type="checkbox" id="setting-notif-slack" checked /> Slack
+                    </label>
+                  </div>
+                </div>
+
+                <div style="display:flex; gap:var(--spacing-md); margin-top:var(--spacing-lg)">
+                  <button type="submit" class="btn btn-primary">Save Settings</button>
+                  <button type="button" class="btn btn-secondary" id="settings-reset">Reset Defaults</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

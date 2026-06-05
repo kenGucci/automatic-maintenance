@@ -1,6 +1,13 @@
+[project]
+name = "automatic-maintenance"
 version = "0.1.0"
 description = "CrewAI Project"
 requires-python = ">=3.10"
-dependencies = ",
-    "crewai-tools"
-] run = "src.crew:run"
+dependencies = [
+    "crewai",
+    "crewai-tools",
+    "flask",
+]
+
+[project.scripts]
+run = "src.crew:run"
