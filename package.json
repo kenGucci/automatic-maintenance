@@ -9,10 +9,7 @@
     "dev": "nodemon index.js",
     "maintenance": "node index.js",
     "dashboard": "python3 dashboard/app.py",
-    "bot": "python3 telegram_bot.py",
-    "crew": "python3 maintenance_crew.py",
-    "x-bot": "python3 x_bot.py",
-    "x-posts": "python3 initial_posts.py"
+    "crew": "python3 maintenance_crew.py"
   },
   "repository": {
     "type": "git",
@@ -26,12 +23,10 @@
     "autonomous-agent",
     "devops",
     "crewai",
-    "telegram-bot",
     "flask",
     "dashboard"
   ],
-  "author": "@Auto_Mend (https://x.com/Auto_Mend)",
-  "maintainer": "kenGucci (https://x.com/suggestionii)",
+  "author": "kenGucci",
   "license": "ISC",
   "dependencies": {},
   "devDependencies": {
