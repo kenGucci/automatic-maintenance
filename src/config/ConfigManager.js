@@ -25,6 +25,13 @@ class ConfigManager {
       securityScan: 'daily',
       backup: 'daily',
     },
+    gitlawb: {
+      enabled: false,
+      nodeUrl: 'https://node.gitlawb.com',
+      did: null,
+      keyPath: null,
+      repoDid: null,
+    },
   };
 
   static load() {
@@ -52,6 +59,13 @@ class ConfigManager {
     if (process.env.DASHBOARD_PORT) config.dashboardPort = parseInt(process.env.DASHBOARD_PORT, 10);
     if (process.env.AUTO_REMEDIATION) config.autoRemediation = process.env.AUTO_REMEDIATION === 'true';
     if (process.env.CLOUDFLARE_API_TOKEN) config.cloudflareApiToken = process.env.CLOUDFLARE_API_TOKEN;
+
+    // Gitlawb integration
+    if (process.env.GITLAWB_ENABLED) config.gitlawb.enabled = process.env.GITLAWB_ENABLED === 'true';
+    if (process.env.GITLAWB_NODE_URL) config.gitlawb.nodeUrl = process.env.GITLAWB_NODE_URL;
+    if (process.env.GITLAWB_DID) config.gitlawb.did = process.env.GITLAWB_DID;
+    if (process.env.GITLAWB_KEY_PATH) config.gitlawb.keyPath = process.env.GITLAWB_KEY_PATH;
+    if (process.env.GITLAWB_REPO_DID) config.gitlawb.repoDid = process.env.GITLAWB_REPO_DID;
 
     // Notification channels
     if (process.env.NOTIFICATION_CHANNELS) {
