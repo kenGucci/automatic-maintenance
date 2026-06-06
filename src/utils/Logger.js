@@ -22,13 +22,18 @@ class Logger {
 
   _format(level, message, meta = {}) {
     const timestamp = new Date().toISOString();
-    const entry = {
+    let entry = {
       timestamp,
       level,
       context: this.context,
       message,
-      ...meta,
     };
+    if (meta instanceof Error) {
+      entry.error = meta.message;
+      entry.stack = meta.stack;
+    } else {
+      entry = { ...entry, ...meta };
+    }
     return JSON.stringify(entry);
   }
 
