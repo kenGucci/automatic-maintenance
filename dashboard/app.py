@@ -103,6 +103,10 @@ def generate_mock_history():
 def index():
     return render_template("index.html")
 
+@app.route("/dashboard")
+def dashboard():
+    return render_template("dashboard.html")
+
 
 @app.route("/api/overview")
 def api_overview():
@@ -190,7 +194,8 @@ def api_update_settings():
 
 @app.route("/api/agents")
 def api_agents():
-    """Return agent status data."""
+    """Return agent status data with runtime."""
+    now = datetime.utcnow()
     return jsonify({
         "agents": [
             {
@@ -200,6 +205,8 @@ def api_agents():
                 "tasks_completed": 47,
                 "success_rate": 94.0,
                 "last_action": "Researched deployment best practices",
+                "runtime": str(timedelta(hours=random.randint(48, 72), minutes=random.randint(0, 59))),
+                "started_at": (now - timedelta(hours=random.randint(48, 72))).isoformat(),
             },
             {
                 "name": "Senior Coder",
@@ -208,6 +215,8 @@ def api_agents():
                 "tasks_completed": 63,
                 "success_rate": 91.0,
                 "last_action": "Fixed memory leak in monitor module",
+                "runtime": str(timedelta(hours=random.randint(48, 72), minutes=random.randint(0, 59))),
+                "started_at": (now - timedelta(hours=random.randint(48, 72))).isoformat(),
             },
             {
                 "name": "Code Reviewer",
@@ -216,6 +225,8 @@ def api_agents():
                 "tasks_completed": 55,
                 "success_rate": 97.0,
                 "last_action": "Reviewed PR #42",
+                "runtime": str(timedelta(hours=random.randint(48, 72), minutes=random.randint(0, 59))),
+                "started_at": (now - timedelta(hours=random.randint(48, 72))).isoformat(),
             },
         ],
         "crew_status": "operational",

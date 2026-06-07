@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AutoMend — Dashboard</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --background: 0 0% 3.9%;
+      --foreground: 0 0% 98%;
+      --card: 0 0% 6%;
+      --card-foreground: 0 0% 98%;
+      --popover: 0 0% 6%;
+      --popover-foreground: 0 0% 98%;
+      --primary: 231 82% 51%;
+      --primary-h: 231;
+      --primary-s: 82%;
+      --primary-l: 51%;
+      --primary-foreground: 0 0% 100%;
+      --secondary: 0 0% 14%;
+      --secondary-foreground: 0 0% 80%;
+      --muted: 0 0% 14%;
+      --muted-foreground: 0 0% 55%;
+      --accent: 0 0% 14%;
+      --accent-foreground: 0 0% 98%;
+      --destructive: 0 84% 60%;
+      --destructive-foreground: 0 0% 98%;
+      --border: 0 0% 14%;
+      --input: 0 0% 14%;
+      --ring: 231 82% 51%;
+      --radius: 0.5rem;
+      --chart-1: 231 82% 51%;
+      --chart-2: 191 82% 51%;
+      --chart-3: 161 82% 51%;
+      --chart-4: 41 89% 55%;
+      --chart-5: 0 84% 60%;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: hsl(var(--background));
+      color: hsl(var(--foreground));
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    .flex { display: flex; }
+    .min-h-screen { min-height: 100vh; }
+
+    .sidebar {
+      width: 240px;
+      background: hsl(var(--card));
+      border-right: 1px solid hsl(var(--border));
+      padding: 24px 12px;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0; bottom: 0;
+      z-index: 50;
+    }
+    .sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 1.0625rem;
+      color: hsl(var(--foreground));
+      padding: 0 12px;
+      margin-bottom: 28px;
+    }
+    .sidebar-logo {
+      width: 28px; height: 28px;
+      background: hsl(var(--primary));
+      border-radius: 6px;
+      display: flex;
+      align-items: center; justify-content: center;
+      color: white;
+      flex-shrink: 0;
+    }
+    .sidebar-logo svg { width: 16px; height: 16px; }
+    .sidebar-nav { flex: 1; }
+    .sidebar-nav a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: hsl(var(--muted-foreground));
+      text-decoration: none;
+      transition: all .15s;
+      margin-bottom: 1px;
+    }
+    .sidebar-nav a:hover { background: hsl(var(--accent)); color: hsl(var(--accent-foreground)); }
+    .sidebar-nav a.active {
+      background: hsla(var(--primary-h), var(--primary-s), var(--primary-l), 0.12);
+      color: hsl(var(--primary));
+    }
+    .sidebar-nav a svg { flex-shrink: 0; }
+    .sidebar-footer {
+      border-top: 1px solid hsl(var(--border));
+      padding-top: 12px;
+      margin-top: 12px;
+    }
+    .sidebar-footer a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 6px;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: hsl(var(--muted-foreground));
+      text-decoration: none;
+      transition: all .15s;
+    }
+    .sidebar-footer a:hover { background: hsl(var(--accent)); color: hsl(var(--accent-foreground)); }
+
+    .main {
+      flex: 1;
+      margin-left: 240px;
+      padding: 0;
+    }
+    .main-header {
+      padding: 24px 32px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .main-header h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+    .main-header .subtitle {
+      font-size: 0.875rem;
+      color: hsl(var(--muted-foreground));
+      margin-top: 2px;
+    }
+    .main-header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: hsl(var(--muted-foreground));
+    }
+    .live-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #22c55e;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+    .main-content { padding: 20px 32px 40px; }
+
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .kpi {
+      background: hsl(var(--card));
+      border: 1px solid hsl(var(--border));
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .kpi-label {
+      font-size: 0.75rem;
+      color: hsl(var(--muted-foreground));
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .kpi-value {
+      font-size: 1.75rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: -0.02em;
+    }
+    .kpi-footer {
+      margin-top: 6px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    .kpi-footer.green { color: #22c55e; }
+    .kpi-footer.yellow { color: #eab308; }
+    .kpi-footer.red { color: #ef4444; }
+    .kpi-footer.neutral { color: hsl(var(--muted-foreground)); }
+
+    .grid-2 { display: grid; grid-template-columns: 1.8fr 1.2fr; gap: 16px; margin-bottom: 16px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 16px; }
+
+    .card {
+      background: hsl(var(--card));
+      border: 1px solid hsl(var(--border));
+      border-radius: var(--radius);
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px 0;
+    }
+    .card-title {
+      font-size: 0.9375rem;
+      font-weight: 600;
+    }
+    .card-badge {
+      font-size: 0.6875rem;
+      font-weight: 500;
+      color: hsl(var(--muted-foreground));
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .card-body { padding: 16px 20px 20px; }
+
+    .alert-list { list-style: none; }
+    .alert-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid hsla(var(--border), 0.5);
+    }
+    .alert-item:last-child { border-bottom: none; }
+    .alert-type {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 100px;
+      text-transform: capitalize;
+      flex-shrink: 0;
+    }
+    .alert-type.critical { background: hsla(0, 84%, 60%, 0.12); color: #f87171; }
+    .alert-type.warning { background: hsla(41, 89%, 55%, 0.12); color: #facc15; }
+    .alert-type.info { background: hsla(231, 82%, 51%, 0.12); color: #818cf8; }
+    .alert-msg { flex: 1; font-size: 0.8125rem; color: hsl(var(--foreground)); min-width: 0; }
+    .alert-time {
+      font-size: 0.7rem;
+      color: hsl(var(--muted-foreground));
+      font-family: 'JetBrains Mono', monospace;
+      flex-shrink: 0;
+    }
+
+    .task-table { width: 100%; border-collapse: collapse; }
+    .task-table th {
+      text-align: left;
+      padding: 8px 12px;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      color: hsl(var(--muted-foreground));
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid hsl(var(--border));
+    }
+    .task-table td {
+      padding: 10px 12px;
+      font-size: 0.8125rem;
+      border-bottom: 1px solid hsla(var(--border), 0.5);
+    }
+    .task-table tr:hover td { background: hsla(var(--accent), 0.3); }
+    .status-badge {
+      font-size: 0.6875rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 100px;
+      white-space: nowrap;
+    }
+    .status-badge.completed { background: hsla(161, 82%, 51%, 0.12); color: #4ade80; }
+    .status-badge.running { background: hsla(231, 82%, 51%, 0.12); color: #818cf8; }
+    .status-badge.pending { background: hsla(41, 89%, 55%, 0.12); color: #facc15; }
+    .status-badge.failed { background: hsla(0, 84%, 60%, 0.12); color: #f87171; }
+
+    .services-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .svc {
+      background: hsl(var(--card));
+      border: 1px solid hsl(var(--border));
+      border-radius: var(--radius);
+      padding: 16px;
+    }
+    .svc-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .svc-name { font-size: 0.8125rem; font-weight: 600; }
+    .svc-status-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+    }
+    .svc-status-dot.healthy { background: #22c55e; }
+    .svc-status-dot.degraded { background: #eab308; }
+    .svc-status-dot.warning { background: #eab308; }
+    .svc-meta {
+      display: flex;
+      gap: 16px;
+      font-size: 0.75rem;
+      color: hsl(var(--muted-foreground));
+    }
+    .svc-meta span { display: flex; align-items: center; gap: 4px; }
+
+    .agent-card {
+      background: hsl(var(--card));
+      border: 1px solid hsl(var(--border));
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+    .agent-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+    .agent-name { font-size: 0.9375rem; font-weight: 600; }
+    .agent-role { font-size: 0.75rem; color: hsl(var(--muted-foreground)); margin-top: 1px; }
+    .agent-status-badge { font-size: 0.6875rem; font-weight: 600; padding: 2px 10px; border-radius: 100px; background: hsla(161, 82%, 51%, 0.12); color: #4ade80; }
+    .agent-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 12px; }
+    .agent-stat { }
+    .agent-stat-value { font-size: 1.125rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+    .agent-stat-label { font-size: 0.6875rem; color: hsl(var(--muted-foreground)); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 1px; }
+    .agent-last-action {
+      font-size: 0.75rem;
+      color: hsl(var(--muted-foreground));
+      padding-top: 10px;
+      border-top: 1px solid hsla(var(--border), 0.5);
+    }
+    .agent-last-action span { color: hsl(var(--foreground)); }
+
+    .section-gap { height: 24px; }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+      .main-header { padding: 16px 16px 0; flex-direction: column; gap: 12px; }
+      .main-content { padding: 12px 16px 40px; }
+      .kpi-row { grid-template-columns: repeat(2, 1fr); }
+      .grid-2 { grid-template-columns: 1fr; }
+      .grid-3 { grid-template-columns: 1fr; }
+      .services-grid { grid-template-columns: 1fr; }
+      .agent-stats { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="flex min-h-screen">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="sidebar-logo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>
+        </div>
+        AutoMend
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#" class="active" data-page="overview">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+          Overview
+        </a>
+        <a href="#" data-page="services">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          Services
+        </a>
+        <a href="#" data-page="agents">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Agents
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <a href="/">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Landing Page
+        </a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="main-header">
+        <div>
+          <h1 id="page-title">Dashboard</h1>
+          <div class="subtitle" id="page-subtitle">Real-time system overview</div>
+        </div>
+        <div class="main-header-right">
+          <span class="status-indicator" id="live-status">Live</span>
+          <span class="status-indicator"><span class="live-dot"></span> <span id="refresh-time">just now</span></span>
+        </div>
+      </div>
+
+      <div class="main-content">
+        <div id="page-overview">
+          <div class="kpi-row" id="kpi-row"></div>
+          <div class="grid-2">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">System Metrics (24h)</div>
+                <div class="card-badge"><span class="live-dot"></span> Live</div>
+              </div>
+              <div class="card-body">
+                <canvas id="metrics-chart" height="220"></canvas>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Recent Alerts</div>
+                <div class="card-badge" id="alert-count"></div>
+              </div>
+              <div class="card-body">
+                <ul class="alert-list" id="alert-list">
+                  <li style="text-align:center;padding:20px;color:hsl(var(--muted-foreground));">Loading...</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Recent Tasks</div>
+              <div class="card-badge" id="task-count"></div>
+            </div>
+            <div class="card-body" style="padding:0;">
+              <table class="task-table">
+                <thead><tr><th>Task</th><th>Status</th><th>Duration</th><th>Time</th></tr></thead>
+                <tbody id="task-body" style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div id="page-services" style="display:none;">
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-header">
+              <div class="card-title">Service Health</div>
+              <div class="card-badge" id="svc-status-badge">Operational</div>
+            </div>
+            <div class="card-body">
+              <div class="services-grid" id="services-grid"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Service Latency</div>
+            </div>
+            <div class="card-body">
+              <canvas id="latency-chart" height="240"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div id="page-agents" style="display:none;">
+          <div class="grid-3" id="agents-container"></div>
+          <div class="card" style="margin-top:16px;">
+            <div class="card-header">
+              <div class="card-title">Crew Status</div>
+              <div class="card-badge" id="crew-status-badge">Operational</div>
+            </div>
+            <div class="card-body" id="agent-crew-stats" style="display:flex;gap:24px;flex-wrap:wrap;"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    const API = { overview: '/api/overview', metrics: '/api/metrics', history: '/api/metrics/history', alerts: '/api/alerts', tasks: '/api/tasks', diagnostics: '/api/diagnostics', agents: '/api/agents' };
+    let metricsChart = null, latencyChart = null;
+
+    function ago(iso) {
+      const s = Math.floor((Date.now() - new Date(iso).getTime()) / 1000);
+      if (s < 60) return s + 's ago';
+      if (s < 3600) return Math.floor(s / 60) + 'm ago';
+      return Math.floor(s / 3600) + 'h ago';
+    }
+
+    function kpi(label, value, footer) {
+      return `<div class="kpi"><div class="kpi-label">${label}</div><div class="kpi-value">${value}</div>${footer ? '<div class="kpi-footer ' + footer.cls + '">' + footer.text + '</div>' : ''}</div>`;
+    }
+
+    async function loadOverview() {
+      try {
+        const [ov, met] = await Promise.all([ fetch(API.overview).then(r=>r.json()), fetch(API.metrics).then(r=>r.json()) ]);
+        document.getElementById('kpi-row').innerHTML =
+          kpi('Health Score', ov.system_health_score + '%', {cls:'green', text:'System ' + ov.agent_status}) +
+          kpi('Uptime', ov.uptime, {cls:'green', text: 'Last check ' + ago(ov.last_check)}) +
+          kpi('CPU', met.cpu_usage + '%', {cls: met.cpu_usage > 80 ? 'red' : met.cpu_usage > 60 ? 'yellow' : 'green', text: met.cpu_usage > 70 ? 'High' : met.cpu_usage > 30 ? 'Moderate' : 'Normal'}) +
+          kpi('Memory', met.memory_usage + '%', {cls: met.memory_usage > 85 ? 'red' : met.memory_usage > 65 ? 'yellow' : 'green', text: met.memory_usage > 75 ? 'High' : met.memory_usage > 40 ? 'Moderate' : 'Normal'});
+      } catch(e) { document.getElementById('kpi-row').innerHTML = '<div class="kpi" style="grid-column:1/-1;text-align:center;color:hsl(var(--muted-foreground));padding:40px;">Failed to load metrics</div>'; }
+    }
+
+    async function loadChart() {
+      try {
+        const data = await fetch(API.history).then(r=>r.json());
+        const labels = data.map(d => { const t = new Date(d.timestamp); return t.getHours() + ':00'; }).reverse();
+        if (metricsChart) { metricsChart.destroy(); }
+        const ctx = document.getElementById('metrics-chart').getContext('2d');
+        metricsChart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [
+              { label: 'CPU', data: data.map(d => d.cpu_usage).reverse(), borderColor: 'hsl(231, 82%, 51%)', backgroundColor: 'hsla(231, 82%, 51%, 0.06)', fill: true, tension: 0.35, pointRadius: 0, borderWidth: 2 },
+              { label: 'Memory', data: data.map(d => d.memory_usage).reverse(), borderColor: 'hsl(191, 82%, 51%)', backgroundColor: 'hsla(191, 82%, 51%, 0.06)', fill: true, tension: 0.35, pointRadius: 0, borderWidth: 2 },
+              { label: 'Disk', data: data.map(d => d.disk_usage).reverse(), borderColor: 'hsl(161, 82%, 51%)', backgroundColor: 'hsla(161, 82%, 51%, 0.06)', fill: true, tension: 0.35, pointRadius: 0, borderWidth: 2 },
+            ]
+          },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: true, labels: { color: 'hsl(0, 0%, 55%)', boxWidth: 12, padding: 16, font: { size: 11 } } } },
+            scales: {
+              x: { grid: { color: 'hsla(0, 0%, 14%, 0.5)' }, ticks: { color: 'hsl(0, 0%, 55%)', font: { size: 11 } } },
+              y: { grid: { color: 'hsla(0, 0%, 14%, 0.5)' }, ticks: { color: 'hsl(0, 0%, 55%)', font: { size: 11 } }, beginAtZero: true, max: 100 }
+            }
+          }
+        });
+      } catch(e) {}
+    }
+
+    async function loadAlerts() {
+      try {
+        const data = await fetch(API.alerts).then(r=>r.json());
+        document.getElementById('alert-list').innerHTML = data.slice(0, 7).map(a =>
+          `<li class="alert-item"><span class="alert-type ${a.type}">${a.type}</span><span class="alert-msg">${a.message}</span><span class="alert-time">${ago(a.timestamp)}</span></li>`
+        ).join('');
+        document.getElementById('alert-count').textContent = data.length + ' alerts';
+      } catch(e) { document.getElementById('alert-list').innerHTML = '<li class="alert-item"><span class="alert-msg" style="color:hsl(var(--muted-foreground));">No data</span></li>'; }
+    }
+
+    async function loadTasks() {
+      try {
+        const data = await fetch(API.tasks).then(r=>r.json());
+        document.getElementById('task-body').innerHTML = data.slice(0, 8).map(t =>
+          `<tr><td>${t.name}</td><td><span class="status-badge ${t.status}">${t.status}</span></td><td>${t.duration_seconds}s</td><td>${ago(t.timestamp)}</td></tr>`
+        ).join('');
+        document.getElementById('task-count').textContent = data.filter(t => t.status === 'completed').length + ' done';
+      } catch(e) { document.getElementById('task-body').innerHTML = '<tr><td colspan="4" style="text-align:center;color:hsl(var(--muted-foreground));">No data</td></tr>'; }
+    }
+
+    async function loadServices() {
+      try {
+        const data = await fetch(API.diagnostics).then(r=>r.json());
+        document.getElementById('services-grid').innerHTML = data.services.map(s =>
+          `<div class="svc"><div class="svc-header"><div class="svc-name">${s.name}</div><div class="svc-status-dot ${s.status}"></div></div><div class="svc-meta"><span>${s.status}</span><span>${s.latency_ms}ms latency</span></div></div>`
+        ).join('');
+        document.getElementById('svc-status-badge').textContent = data.overall_status;
+        const labels = data.services.map(s => s.name);
+        const values = data.services.map(s => s.latency_ms);
+        const colors = data.services.map(s => s.status === 'healthy' ? 'hsl(161, 82%, 51%)' : 'hsl(41, 89%, 55%)');
+        if (latencyChart) { latencyChart.destroy(); }
+        const ctx = document.getElementById('latency-chart').getContext('2d');
+        latencyChart = new Chart(ctx, {
+          type: 'bar',
+          data: { labels, datasets: [{ label: 'Latency (ms)', data: values, backgroundColor: colors, borderRadius: 6, borderSkipped: false }] },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { display: false }, ticks: { color: 'hsl(0, 0%, 55%)', font: { size: 11 } } },
+              y: { grid: { color: 'hsla(0, 0%, 14%, 0.5)' }, ticks: { color: 'hsl(0, 0%, 55%)', font: { size: 11 } }, beginAtZero: true }
+            }
+          }
+        });
+      } catch(e) {}
+    }
+
+    async function loadAgents() {
+      try {
+        const data = await fetch(API.agents).then(r=>r.json());
+        document.getElementById('agents-container').innerHTML = data.agents.map(a =>
+          `<div class="agent-card">
+            <div class="agent-card-top">
+              <div>
+                <div class="agent-name">${a.name}</div>
+                <div class="agent-role">${a.role}</div>
+              </div>
+              <div class="agent-status-badge">${a.status}</div>
+            </div>
+            <div class="agent-stats">
+              <div class="agent-stat">
+                <div class="agent-stat-value">${a.tasks_completed}</div>
+                <div class="agent-stat-label">Tasks</div>
+              </div>
+              <div class="agent-stat">
+                <div class="agent-stat-value">${a.success_rate}%</div>
+                <div class="agent-stat-label">Success</div>
+              </div>
+              <div class="agent-stat">
+                <div class="agent-stat-value">${a.runtime || '—'}</div>
+                <div class="agent-stat-label">Runtime</div>
+              </div>
+            </div>
+            <div class="agent-last-action">Last action: <span>${a.last_action}</span></div>
+          </div>`
+        ).join('');
+        document.getElementById('crew-status-badge').textContent = data.crew_status;
+        document.getElementById('agent-crew-stats').innerHTML =
+          `<div><div style="font-size:1.25rem;font-weight:700;font-family:'JetBrains Mono',monospace;">${data.total_tasks_completed}</div><div style="font-size:0.75rem;color:hsl(var(--muted-foreground));">Total Tasks</div></div>` +
+          `<div><div style="font-size:1.25rem;font-weight:700;font-family:'JetBrains Mono',monospace;">${data.average_success_rate}%</div><div style="font-size:0.75rem;color:hsl(var(--muted-foreground));">Avg Success</div></div>` +
+          `<div><div style="font-size:1.25rem;font-weight:700;font-family:'JetBrains Mono',monospace;">${data.agents.length}</div><div style="font-size:0.75rem;color:hsl(var(--muted-foreground));">Active Agents</div></div>`;
+      } catch(e) { document.getElementById('agents-container').innerHTML = '<div style="grid-column:1/-1;text-align:center;color:hsl(var(--muted-foreground));padding:40px;">Failed to load agents</div>'; }
+    }
+
+    document.querySelectorAll('.sidebar-nav a[data-page]').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        document.querySelectorAll('.sidebar-nav a[data-page]').forEach(x => x.classList.remove('active'));
+        a.classList.add('active');
+        document.querySelectorAll('.main-content > div[id^="page-"]').forEach(d => d.style.display = 'none');
+        document.getElementById('page-' + a.dataset.page).style.display = 'block';
+        const titles = { overview: ['Dashboard', 'Real-time system overview'], services: ['Services', 'Service health and latency monitoring'], agents: ['Agents', 'AI agent runtime and performance'] };
+        document.getElementById('page-title').textContent = titles[a.dataset.page][0];
+        document.getElementById('page-subtitle').textContent = titles[a.dataset.page][1];
+      });
+    });
+
+    async function refreshAll() {
+      const start = performance.now();
+      await Promise.all([loadOverview(), loadChart(), loadAlerts(), loadTasks(), loadServices(), loadAgents()]);
+      document.getElementById('refresh-time').textContent = (performance.now() - start).toFixed(0) + 'ms';
+    }
+    refreshAll();
+    setInterval(refreshAll, 15000);
+  </script>
+</body>
+</html>

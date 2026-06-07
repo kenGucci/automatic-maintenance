@@ -4,10 +4,8 @@ version = "0.1.0"
 description = "CrewAI Project"
 requires-python = ">=3.10"
 dependencies = [
-    "crewai",
-    "crewai-tools",
     "flask",
-    "python-telegram-bot",
+    "gunicorn",
 ]
 
 [project.scripts]
