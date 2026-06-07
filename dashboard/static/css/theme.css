@@ -23,7 +23,7 @@ body {
 
 a { color: inherit; text-decoration: none; }
 
-::selection { background: #4f46e5; color: white; }
+::selection { background: #1e32e6; color: white; }
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
@@ -64,7 +64,7 @@ a { color: inherit; text-decoration: none; }
 .nav-logo {
   width: 32px;
   height: 32px;
-  background: linear-gradient(135deg, #4f46e5, #06b6d4);
+  background: linear-gradient(135deg, #1e32e6, #4a5af0);
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -199,15 +199,15 @@ a { color: inherit; text-decoration: none; }
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  background: #1e32e6;
   color: white;
-  border-color: rgba(79, 70, 229, 0.3);
-  box-shadow: 0 4px 20px rgba(79, 70, 229, 0.25);
+  border-color: rgba(30, 50, 230, 0.3);
+  box-shadow: 0 4px 20px rgba(30, 50, 230, 0.25);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(79, 70, 229, 0.35);
+  box-shadow: 0 8px 30px rgba(30, 50, 230, 0.35);
 }
 
 .btn-secondary {
@@ -360,7 +360,7 @@ a { color: inherit; text-decoration: none; }
 .step-number {
   font-size: 0.75rem;
   font-weight: 700;
-  color: #4f46e5;
+  color: #1e32e6;
   letter-spacing: 0.08em;
   margin-bottom: 12px;
 }
@@ -433,7 +433,7 @@ a { color: inherit; text-decoration: none; }
   left: 0;
   right: 0;
   height: 3px;
-  background: linear-gradient(90deg, #4f46e5, #06b6d4);
+  background: linear-gradient(90deg, #1e32e6, #4a5af0);
   opacity: 0;
   transition: opacity 0.3s;
 }
@@ -501,8 +501,8 @@ a { color: inherit; text-decoration: none; }
 }
 
 .pricing-featured {
-  border-color: rgba(79, 70, 229, 0.3);
-  background: rgba(79, 70, 229, 0.04);
+  border-color: rgba(30, 50, 230, 0.3);
+  background: rgba(30, 50, 230, 0.04);
   position: relative;
 }
 
@@ -516,7 +516,7 @@ a { color: inherit; text-decoration: none; }
   font-size: 0.75rem;
   font-weight: 600;
   color: white;
-  background: linear-gradient(135deg, #4f46e5, #6366f1);
+  background: #1e32e6;
   white-space: nowrap;
 }
 
@@ -568,7 +568,7 @@ a { color: inherit; text-decoration: none; }
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: #4f46e5;
+  background: #1e32e6;
   flex-shrink: 0;
 }
 
