@@ -13,6 +13,8 @@ const Logger = require('./src/utils/Logger');
 
 const logger = new Logger('AutomaticMaintenance');
 
+let agent = null;
+
 /**
  * Initialize and start the autonomous maintenance agent
  */
@@ -27,7 +29,7 @@ async function bootstrap() {
     // Initialize system components
     const monitor = new SystemMonitor(config);
     const diagnostic = new DiagnosticEngine(config);
-    const agent = new MaintenanceAgent(config, monitor, diagnostic);
+    agent = new MaintenanceAgent(config, monitor, diagnostic);
 
     // Start monitoring
     logger.info('📊 Starting system monitoring...');
@@ -45,11 +47,13 @@ async function bootstrap() {
 // Handle graceful shutdown
 process.on('SIGINT', () => {
   logger.info('⏹️  Shutting down Automatic Maintenance Agent...');
+  if (agent) agent.stop();
   process.exit(0);
 });
 
 process.on('SIGTERM', () => {
   logger.info('⏹️  Shutting down Automatic Maintenance Agent...');
+  if (agent) agent.stop();
   process.exit(0);
 });
 

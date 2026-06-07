@@ -3,6 +3,7 @@
  * Performs service health checks, latency measurements, and trend analysis.
  */
 
+const net = require('net');
 const Logger = require('../utils/Logger');
 
 const logger = new Logger('DiagnosticEngine');
@@ -126,8 +127,7 @@ class DiagnosticEngine {
    * Check if a port is reachable
    */
   _checkPort(port, protocol = 'tcp') {
-    return new Promise((resolve) => {
-      const net = require('net');
+    return new Promise((resolve, reject) => {
       const start = Date.now();
 
       const socket = new net.Socket();
@@ -141,13 +141,12 @@ class DiagnosticEngine {
 
       socket.on('timeout', () => {
         socket.destroy();
-        resolve(2000); // Timeout = 2000ms latency
+        resolve(2000);
       });
 
-      socket.on('error', () => {
+      socket.on('error', (err) => {
         socket.destroy();
-        // Service not running locally - return mock latency
-        resolve(Math.floor(Math.random() * 50) + 1);
+        reject(new Error(`Port ${port} unreachable: ${err.message}`));
       });
 
       socket.connect(port, '127.0.0.1');

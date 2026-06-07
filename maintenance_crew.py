@@ -31,6 +31,7 @@ review_task = Task(
     expected_output="Review summary with approved changes and any final recommendations"
 )
 
-crew = Crew(agents=[coder, reviewer], tasks=[coding_task, review_task], process=Process.sequential, verbose=2)
-result = crew.kickoff()
-print(result)
+if __name__ == "__main__":
+    crew = Crew(agents=[coder, reviewer], tasks=[coding_task, review_task], process=Process.sequential, verbose=2)
+    result = crew.kickoff()
+    print(result)

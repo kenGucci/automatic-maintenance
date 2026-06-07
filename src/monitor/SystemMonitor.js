@@ -16,6 +16,7 @@ class SystemMonitor {
     this.history = [];
     this.maxHistorySize = 1440; // 24h at 1-minute intervals
     this._interval = null;
+    this._previousCpu = null;
   }
 
   /**
@@ -169,8 +170,16 @@ class SystemMonitor {
       totalIdle += cpu.times.idle;
     }
 
-    const totalUsage = totalTick - totalIdle;
-    return ((totalUsage / totalTick) * 100).toFixed(1);
+    if (this._previousCpu) {
+      const idleDelta = totalIdle - this._previousCpu.idle;
+      const tickDelta = totalTick - this._previousCpu.tick;
+      const usage = tickDelta > 0 ? ((tickDelta - idleDelta) / tickDelta) * 100 : 0;
+      this._previousCpu = { idle: totalIdle, tick: totalTick };
+      return usage.toFixed(1);
+    }
+
+    this._previousCpu = { idle: totalIdle, tick: totalTick };
+    return '0.0';
   }
 
   _getDiskUsage() {

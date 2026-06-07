@@ -47,7 +47,7 @@ class ConfigManager {
         const [key, ...valueParts] = trimmed.split('=');
         const value = valueParts.join('=').trim().replace(/^["']|["']$/g, '');
         if (key && value) {
-          process.env[key.trim] = value;
+          process.env[key.trim()] = value;
         }
       }
     }

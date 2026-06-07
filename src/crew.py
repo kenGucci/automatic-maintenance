@@ -27,3 +27,6 @@ crew = Crew(
 def run():
     result = crew.kickoff()
     print(result)
+
+if __name__ == "__main__":
+    run()

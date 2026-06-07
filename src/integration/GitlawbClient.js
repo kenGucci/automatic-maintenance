@@ -1,16 +1,9 @@
-/**
- * GitlawbClient - Integration with gitlawb decentralized Git network
- * Enables the maintenance agent to create issues, PRs, and sync maintenance records
- * to the gitlawb network for collaborative AI agent workflows.
- */
-
-const { exec } = require('child_process');
-const { promisify } = require('util');
+const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 const Logger = require('../utils/Logger');
 
-const execAsync = promisify(exec);
 const logger = new Logger('GitlawbClient');
 
 class GitlawbClient {
@@ -24,9 +17,6 @@ class GitlawbClient {
     this.initialized = false;
   }
 
-  /**
-   * Initialize gitlawb client and verify connection
-   */
   async initialize() {
     if (!this.enabled) {
       logger.info('Gitlawb integration is disabled');
@@ -35,22 +25,18 @@ class GitlawbClient {
 
     try {
       logger.info('Initializing gitlawb client...');
-
-      // Check if gl CLI is installed
       await this._checkCliInstalled();
 
-      // Set environment variables
       process.env.GITLAWB_NODE = this.nodeUrl;
-      
+
       if (this.did) {
         process.env.GITLAWB_DID = this.did;
       }
-      
+
       if (this.keyPath) {
         process.env.GITLAWB_KEY = this.keyPath;
       }
 
-      // Verify connection to node
       await this._verifyConnection();
 
       this.initialized = true;
@@ -67,9 +53,31 @@ class GitlawbClient {
     }
   }
 
-  /**
-   * Create a maintenance issue on gitlawb
-   */
+  async _runGlCommand(args) {
+    return new Promise((resolve, reject) => {
+      const child = spawn('gl', args, {
+        env: { ...process.env, GITLAWB_NODE: this.nodeUrl },
+        stdio: ['ignore', 'pipe', 'pipe'],
+      });
+
+      let stdout = '';
+      let stderr = '';
+
+      child.stdout.on('data', (data) => { stdout += data.toString(); });
+      child.stderr.on('data', (data) => { stderr += data.toString(); });
+
+      child.on('close', (code) => {
+        if (code === 0) {
+          resolve(stdout.trim());
+        } else {
+          reject(new Error(stderr.trim() || `gl exited with code ${code}`));
+        }
+      });
+
+      child.on('error', reject);
+    });
+  }
+
   async createMaintenanceIssue(alert, diagnosticResults) {
     if (!this.initialized || !this.repoDid) {
       logger.warn('Cannot create issue: gitlawb not initialized');
@@ -82,22 +90,21 @@ class GitlawbClient {
 
       logger.info('Creating maintenance issue on gitlawb...', { title });
 
-      const command = `gl issue create "${this.repoDid}" --title "${title}" --body "${body}" --label "maintenance,automated"`;
-      const { stdout } = await execAsync(command, {
-        env: { ...process.env, GITLAWB_NODE: this.nodeUrl },
-      });
+      const output = await this._runGlCommand([
+        'issue', 'create', this.repoDid,
+        '--title', title,
+        '--body', body,
+        '--label', 'maintenance,automated',
+      ]);
 
-      logger.info('Maintenance issue created successfully', { output: stdout });
-      return { success: true, output: stdout };
+      logger.info('Maintenance issue created successfully', { output });
+      return { success: true, output };
     } catch (error) {
       logger.error('Failed to create maintenance issue', error);
       return { success: false, error: error.message };
     }
   }
 
-  /**
-   * Create a PR for automated maintenance fixes
-   */
   async createMaintenancePR(branchName, title, description, files) {
     if (!this.initialized || !this.repoDid) {
       logger.warn('Cannot create PR: gitlawb not initialized');
@@ -107,26 +114,23 @@ class GitlawbClient {
     try {
       logger.info('Creating maintenance PR on gitlawb...', { title, branch: branchName });
 
-      // Push branch first
       await this._pushBranch(branchName, files);
 
-      // Create PR
-      const command = `gl pr create "${this.repoDid}" --head "${branchName}" --base "main" --title "${title}"`;
-      const { stdout } = await execAsync(command, {
-        env: { ...process.env, GITLAWB_NODE: this.nodeUrl },
-      });
+      const output = await this._runGlCommand([
+        'pr', 'create', this.repoDid,
+        '--head', branchName,
+        '--base', 'main',
+        '--title', title,
+      ]);
 
-      logger.info('Maintenance PR created successfully', { output: stdout });
-      return { success: true, output: stdout };
+      logger.info('Maintenance PR created successfully', { output });
+      return { success: true, output };
     } catch (error) {
       logger.error('Failed to create maintenance PR', error);
       return { success: false, error: error.message };
     }
   }
 
-  /**
-   * Sync maintenance report to gitlawb
-   */
   async syncMaintenanceReport(report) {
     if (!this.initialized || !this.repoDid) {
       logger.warn('Cannot sync report: gitlawb not initialized');
@@ -134,29 +138,34 @@ class GitlawbClient {
     }
 
     try {
-      const reportPath = path.join('/tmp', `maintenance-report-${Date.now()}.json`);
+      const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'maint-report-'));
+      const reportPath = path.join(tmpDir, `maintenance-report-${Date.now()}.json`);
       fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
 
       const commitMessage = `Maintenance report: ${report.overall_status} at ${new Date().toISOString()}`;
 
       logger.info('Syncing maintenance report to gitlawb...');
 
-      const command = `cd /tmp && git add "${reportPath}" && git commit -m "${commitMessage}" && git push origin main`;
-      const { stdout } = await execAsync(command, {
-        env: { ...process.env, GITLAWB_NODE: this.nodeUrl },
-      });
+      await this._execGitCommand(tmpDir, ['init']);
+      await this._execGitCommand(tmpDir, ['config', 'user.email', 'maintenance@automatic-agent']);
+      await this._execGitCommand(tmpDir, ['config', 'user.name', 'Automatic Maintenance']);
+      await this._execGitCommand(tmpDir, ['add', reportPath]);
+      await this._execGitCommand(tmpDir, ['commit', '-m', commitMessage]);
+
+      const output = await this._runGlCommand([
+        'repo', 'push', this.repoDid,
+        '--source', tmpDir,
+        '--branch', 'main',
+      ]);
 
       logger.info('Maintenance report synced successfully');
-      return { success: true, output: stdout };
+      return { success: true, output };
     } catch (error) {
       logger.error('Failed to sync maintenance report', error);
       return { success: false, error: error.message };
     }
   }
 
-  /**
-   * List existing maintenance issues
-   */
   async listMaintenanceIssues(limit = 10) {
     if (!this.initialized || !this.repoDid) {
       logger.warn('Cannot list issues: gitlawb not initialized');
@@ -164,22 +173,20 @@ class GitlawbClient {
     }
 
     try {
-      const command = `gl issue list "${this.repoDid}" --label "maintenance" --limit ${limit}`;
-      const { stdout } = await execAsync(command, {
-        env: { ...process.env, GITLAWB_NODE: this.nodeUrl },
-      });
+      const output = await this._runGlCommand([
+        'issue', 'list', this.repoDid,
+        '--label', 'maintenance',
+        '--limit', String(limit),
+      ]);
 
-      return { success: true, issues: stdout };
+      return { success: true, issues: output };
     } catch (error) {
       logger.error('Failed to list maintenance issues', error);
       return { success: false, error: error.message };
     }
   }
 
-  /**
-   * Get gitlawb status
-   */
-  async getStatus() {
+  getStatus() {
     return {
       enabled: this.enabled,
       initialized: this.initialized,
@@ -189,11 +196,28 @@ class GitlawbClient {
     };
   }
 
-  // --- Private methods ---
+  async _execGitCommand(cwd, args) {
+    return new Promise((resolve, reject) => {
+      const child = spawn('git', args, { cwd, stdio: ['ignore', 'pipe', 'pipe'] });
+      let stderr = '';
+
+      child.stderr.on('data', (data) => { stderr += data.toString(); });
+
+      child.on('close', (code) => {
+        if (code === 0) {
+          resolve();
+        } else {
+          reject(new Error(stderr.trim()));
+        }
+      });
+
+      child.on('error', reject);
+    });
+  }
 
   async _checkCliInstalled() {
     try {
-      await execAsync('gl --version');
+      await this._runGlCommand(['--version']);
       logger.debug('gitlawb CLI is installed');
     } catch (error) {
       throw new Error(
@@ -204,19 +228,35 @@ class GitlawbClient {
 
   async _verifyConnection() {
     try {
-      const { stdout } = await execAsync('gl node status', {
-        env: { ...process.env, GITLAWB_NODE: this.nodeUrl },
-      });
-      logger.debug('Gitlawb node connection verified', { output: stdout });
+      const output = await this._runGlCommand(['node', 'status']);
+      logger.debug('Gitlawb node connection verified', { output });
     } catch (error) {
       throw new Error(`Failed to connect to gitlawb node: ${error.message}`);
     }
   }
 
   async _pushBranch(branchName, files) {
-    // This would integrate with git operations
-    // For now, we'll log the intent
-    logger.info('Pushing maintenance branch', { branch: branchName, files });
+    const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'maint-branch-'));
+    const filePath = path.join(tmpDir, 'maintenance-change.md');
+
+    const content = `# Automated Maintenance Change\n\nBranch: ${branchName}\nDate: ${new Date().toISOString()}\n\nChanges applied:\n${files.map(f => `- ${f}`).join('\n') || '- No specific files'}`;
+
+    fs.writeFileSync(filePath, content);
+
+    await this._execGitCommand(tmpDir, ['init']);
+    await this._execGitCommand(tmpDir, ['config', 'user.email', 'maintenance@automatic-agent']);
+    await this._execGitCommand(tmpDir, ['config', 'user.name', 'Automatic Maintenance']);
+    await this._execGitCommand(tmpDir, ['add', filePath]);
+    await this._execGitCommand(tmpDir, ['commit', '-m', `Maintenance: ${branchName}`]);
+    await this._execGitCommand(tmpDir, ['branch', '-M', branchName]);
+
+    await this._runGlCommand([
+      'repo', 'push', this.repoDid,
+      '--source', tmpDir,
+      '--branch', branchName,
+    ]);
+
+    logger.info('Maintenance branch pushed', { branch: branchName });
   }
 
   _formatIssueBody(alert, diagnosticResults) {
@@ -242,7 +282,7 @@ ${diagnosticResults?.recommendations?.map(r => `- [${r.priority}] ${r.message}`)
 ---
 *Generated by Automatic Maintenance Agent*
 `;
-    return body.replace(/"/g, '\\"');
+    return body;
   }
 }
 
