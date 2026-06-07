@@ -1,7 +1,7 @@
 """Automatic Maintenance Dashboard - Flask Server"""
 
 import os
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 import random
 import time
 from datetime import datetime, timedelta
@@ -233,6 +233,146 @@ def api_agents():
         "total_tasks_completed": 165,
         "average_success_rate": 94.0,
     })
+
+
+# --- Pro Dashboard Route ---
+
+@app.route("/dashboard/pro")
+def pro_dashboard():
+    return render_template("pro-dashboard.html")
+
+
+# --- Pro Dashboard API ---
+
+AGENT_TYPES = ["server", "docker", "kubernetes", "custom"]
+AGENT_NAMES = [
+    "Production-Web-01", "Staging-API-02", "DB-Replica-East",
+    "Cache-Cluster-01", "Worker-Pool-03", "Monitoring-Host",
+    "Build-Server", "CDN-Edge-05",
+]
+
+# Simulated connected agents (starts with 3, grows as users connect more)
+_connected_agents = []
+
+
+def _get_or_create_agents():
+    if not _connected_agents:
+        now = datetime.utcnow()
+        for i in range(3):
+            start = now - timedelta(hours=random.randint(48, 168))
+            _connected_agents.append({
+                "id": f"agent-{i+1}",
+                "name": AGENT_NAMES[i],
+                "type": random.choice(AGENT_TYPES),
+                "role": random.choice(["Web Server", "API Gateway", "Database", "Cache Layer", "Worker"]),
+                "status": random.choice(["active", "active", "active", "warning"]),
+                "health_score": round(random.uniform(65, 99), 1),
+                "tasks_completed": random.randint(20, 200),
+                "success_rate": round(random.uniform(80, 99), 1),
+                "cpu": round(random.uniform(10, 90), 1),
+                "memory": round(random.uniform(20, 90), 1),
+                "alerts": random.randint(0, 8),
+                "runtime": str(timedelta(hours=random.randint(24, 168), minutes=random.randint(0, 59))),
+                "uptime_hours": round(random.uniform(24, 168), 1),
+                "last_active": (now - timedelta(minutes=random.randint(0, 30))).isoformat(),
+            })
+    return _connected_agents
+
+
+@app.route("/api/pro/agents")
+def api_pro_agents():
+    agents = _get_or_create_agents()
+    for a in agents:
+        a["health_score"] = round(random.uniform(65, 99), 1)
+        a["cpu"] = round(random.uniform(10, 90), 1)
+        a["memory"] = round(random.uniform(20, 90), 1)
+        a["alerts"] = random.randint(0, 8)
+        a["last_active"] = (datetime.utcnow() - timedelta(minutes=random.randint(0, 30))).isoformat()
+    return jsonify({"agents": agents})
+
+
+@app.route("/api/pro/alerts")
+def api_pro_alerts():
+    agents = _get_or_create_agents()
+    alert_types = ["critical", "warning", "info"]
+    alert_msgs = [
+        "CPU threshold exceeded", "Memory usage spike", "Disk space low",
+        "Service unresponsive", "SSL cert expiring", "Connection pool full",
+        "High latency detected", "Backup completed", "Config drift detected",
+        "Security scan passed",
+    ]
+    alerts = []
+    for a in agents:
+        for _ in range(random.randint(1, 4)):
+            alerts.append({
+                "id": len(alerts) + 1,
+                "agent_name": a["name"],
+                "type": random.choice(alert_types),
+                "message": random.choice(alert_msgs),
+                "timestamp": (datetime.utcnow() - timedelta(minutes=random.randint(0, 1440))).isoformat(),
+            })
+    return jsonify({"alerts": sorted(alerts, key=lambda x: x["timestamp"], reverse=True)})
+
+
+@app.route("/api/pro/analytics")
+def api_pro_analytics():
+    return jsonify({
+        "avg_response_time": round(random.uniform(20, 200), 1),
+        "maintenance_tasks": random.randint(50, 500),
+        "auto_remediation_rate": round(random.uniform(85, 99), 1),
+        "success_history": [round(random.uniform(85, 99), 1) for _ in range(30)],
+        "task_distribution": [random.randint(10, 35) for _ in range(5)],
+    })
+
+
+@app.route("/api/pro/maintenance")
+def api_pro_maintenance():
+    agents = _get_or_create_agents()
+    maint_tasks = [
+        "Log Rotation", "Security Scan", "Disk Cleanup",
+        "Backup Verification", "Dependency Update", "Cache Flush",
+        "Cert Renewal", "Config Sync", "Health Check", "Performance Audit",
+    ]
+    schedules = []
+    for a in agents:
+        items = []
+        for _ in range(random.randint(4, 7)):
+            items.append({
+                "task": random.choice(maint_tasks),
+                "last_run": (datetime.utcnow() - timedelta(hours=random.randint(0, 72))).isoformat(),
+                "status": random.choice(["completed", "running", "pending"]),
+            })
+        schedules.append({
+            "agent_name": a["name"],
+            "status": random.choice(["On track", "Needs attention"]),
+            "items": items,
+        })
+    return jsonify({"schedules": schedules})
+
+
+@app.route("/api/pro/connect", methods=["POST"])
+def api_pro_connect():
+    data = request.get_json() or {}
+    agents = _get_or_create_agents()
+    now = datetime.utcnow()
+    new_id = f"agent-{len(agents) + 1}"
+    agents.append({
+        "id": new_id,
+        "name": data.get("name", f"Agent {len(agents) + 1}"),
+        "type": data.get("type", "server"),
+        "role": "Custom Agent",
+        "status": "active",
+        "health_score": round(random.uniform(70, 95), 1),
+        "tasks_completed": 0,
+        "success_rate": 100.0,
+        "cpu": round(random.uniform(10, 50), 1),
+        "memory": round(random.uniform(20, 60), 1),
+        "alerts": 0,
+        "runtime": "0h 0m",
+        "uptime_hours": 0,
+        "last_active": now.isoformat(),
+    })
+    return jsonify({"status": "connected", "agent_id": new_id})
 
 
 if __name__ == "__main__":

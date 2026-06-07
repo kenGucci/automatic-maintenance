@@ -101,6 +101,16 @@
       background: hsla(var(--primary-h), var(--primary-s), var(--primary-l), 0.12);
       color: hsl(var(--primary));
     }
+    .sidebar-nav a .pro-tag {
+      font-size: 0.55rem;
+      font-weight: 700;
+      background: #1e32e6;
+      color: white;
+      padding: 1px 5px;
+      border-radius: 3px;
+      margin-left: auto;
+      letter-spacing: 0.04em;
+    }
     .sidebar-nav a svg { flex-shrink: 0; }
     .sidebar-footer {
       border-top: 1px solid hsl(var(--border));
@@ -381,6 +391,11 @@
         <a href="#" data-page="agents">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           Agents
+        </a>
+        <a href="/dashboard/pro">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>
+          Pro Dashboard
+          <span class="pro-tag">PRO</span>
         </a>
       </nav>
       <div class="sidebar-footer">
