@@ -11,6 +11,18 @@ const DiagnosticEngine = require('./src/diagnostic/DiagnosticEngine');
 const ConfigManager = require('./src/config/ConfigManager');
 const Logger = require('./src/utils/Logger');
 
+// Sentry — error tracking (optional, requires SENTRY_DSN env)
+if (process.env.SENTRY_DSN) {
+  try {
+    const Sentry = require('@sentry/node');
+    Sentry.init({ dsn: process.env.SENTRY_DSN, environment: process.env.NODE_ENV || 'development', tracesSampleRate: 0.2 });
+    const logger = new Logger('Sentry');
+    logger.info('Sentry error tracking initialized');
+  } catch (e) {
+    // @sentry/node not installed, skip
+  }
+}
+
 const logger = new Logger('AutomaticMaintenance');
 
 let agent = null;

@@ -4,6 +4,15 @@ import os, time, hashlib, math
 from flask import Flask, render_template, jsonify, request
 from datetime import datetime, timedelta
 
+# Sentry — error tracking (optional, requires SENTRY_DSN env)
+_sentry_dsn = os.environ.get('SENTRY_DSN')
+if _sentry_dsn:
+    try:
+        import sentry_sdk
+        sentry_sdk.init(dsn=_sentry_dsn, environment=os.environ.get('NODE_ENV', 'development'), traces_sample_rate=0.2)
+    except ImportError:
+        pass
+
 _basedir = os.path.dirname(os.path.abspath(__file__))
 app = Flask(__name__,
     template_folder=os.path.join(_basedir, 'templates'),

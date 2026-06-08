@@ -6,6 +6,7 @@
 [![Node](https://img.shields.io/badge/node-%3E%3D18-339933?logo=node.js)](package.json)
 [![Python](https://img.shields.io/badge/python-%3E%3D3.10-3776AB?logo=python)](pyproject.toml)
 [![Docker](https://img.shields.io/badge/docker-ready-2496ED?logo=docker)](Dockerfile)
+[![Sentry](https://img.shields.io/badge/error%20tracking-Sentry-362D59?logo=sentry)](https://sentry.io)
 [![Vercel](https://img.shields.io/badge/deployed%20on-Vercel-000?logo=vercel)](https://automatic-maintenance.vercel.app)
 [![Live Demo](https://img.shields.io/badge/live-dashboard-818cf8?logo=vercel)](https://automatic-maintenance.vercel.app/dashboard)
 [![Contributors](https://img.shields.io/badge/contributors-welcome-brightgreen)](/CONTRIBUTING.md)
