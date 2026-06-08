@@ -342,6 +342,28 @@
 
     .section-gap { height: 24px; }
 
+    .timeline { position: relative; padding: 8px 0; }
+    .timeline::before {
+      content: ''; position: absolute; top: 0; bottom: 0; left: 16px;
+      width: 2px; background: hsla(var(--border), 0.5);
+    }
+    .tl-item {
+      display: flex; gap: 16px; padding: 12px 0;
+      position: relative; align-items: flex-start;
+    }
+    .tl-dot {
+      width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0;
+      margin-top: 3px; position: relative; z-index: 1;
+      border: 2px solid hsl(var(--card));
+    }
+    .tl-dot.action { background: #1e32e6; }
+    .tl-dot.alert { background: #f87171; }
+    .tl-dot.info { background: #64748b; }
+    .tl-dot.success { background: #4ade80; }
+    .tl-content { flex: 1; min-width: 0; }
+    .tl-message { font-size: 0.8125rem; color: hsl(var(--foreground)); line-height: 1.5; }
+    .tl-time { font-size: 0.6875rem; color: hsl(var(--muted-foreground)); margin-top: 2px; font-family: 'JetBrains Mono', monospace; }
+
     @media (max-width: 768px) {
       .sidebar { display: none; }
       .main { margin-left: 0; }
@@ -391,6 +413,10 @@
         <a href="#" data-page="agents">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           Agents
+        </a>
+        <a href="#" data-page="activity">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Activity
         </a>
         <a href="/dashboard/pro">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>
@@ -487,12 +513,26 @@
             <div class="card-body" id="agent-crew-stats" style="display:flex;gap:24px;flex-wrap:wrap;"></div>
           </div>
         </div>
+
+        <div id="page-activity" style="display:none;">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Event Timeline</div>
+              <div class="card-badge" id="activity-count">Live</div>
+            </div>
+            <div class="card-body">
+              <div class="timeline" id="timeline">
+                <div style="text-align:center;padding:20px;color:hsl(var(--muted-foreground));">Loading...</div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
   </div>
 
   <script>
-    const API = { overview: '/api/overview', metrics: '/api/metrics', history: '/api/metrics/history', alerts: '/api/alerts', tasks: '/api/tasks', diagnostics: '/api/diagnostics', agents: '/api/agents' };
+    const API = { overview: '/api/overview', metrics: '/api/metrics', history: '/api/metrics/history', alerts: '/api/alerts', tasks: '/api/tasks', diagnostics: '/api/diagnostics', agents: '/api/agents', activity: '/api/activity' };
     let metricsChart = null, latencyChart = null;
 
     function ago(iso) {
@@ -592,6 +632,16 @@
       } catch(e) {}
     }
 
+    async function loadActivity() {
+      try {
+        const data = await fetch(API.activity).then(r=>r.json());
+        document.getElementById('timeline').innerHTML = data.events.map(e =>
+          `<div class="tl-item"><div class="tl-dot ${e.type}"></div><div class="tl-content"><div class="tl-message">${e.message}</div><div class="tl-time">${ago(e.timestamp)}</div></div></div>`
+        ).join('');
+        document.getElementById('activity-count').textContent = data.events.length + ' events';
+      } catch(e) { document.getElementById('timeline').innerHTML = '<div style="text-align:center;padding:20px;color:hsl(var(--muted-foreground));">No data</div>'; }
+    }
+
     async function loadAgents() {
       try {
         const data = await fetch(API.agents).then(r=>r.json());
@@ -636,7 +686,7 @@
         a.classList.add('active');
         document.querySelectorAll('.main-content > div[id^="page-"]').forEach(d => d.style.display = 'none');
         document.getElementById('page-' + a.dataset.page).style.display = 'block';
-        const titles = { overview: ['Dashboard', 'Real-time system overview'], services: ['Services', 'Service health and latency monitoring'], agents: ['Agents', 'AI agent runtime and performance'] };
+        const titles = { overview: ['Dashboard', 'Real-time system overview'], services: ['Services', 'Service health and latency monitoring'], agents: ['Agents', 'AI agent runtime and performance'], activity: ['Activity', 'Live event timeline'] };
         document.getElementById('page-title').textContent = titles[a.dataset.page][0];
         document.getElementById('page-subtitle').textContent = titles[a.dataset.page][1];
       });
@@ -644,7 +694,7 @@
 
     async function refreshAll() {
       const start = performance.now();
-      await Promise.all([loadOverview(), loadChart(), loadAlerts(), loadTasks(), loadServices(), loadAgents()]);
+      await Promise.all([loadOverview(), loadChart(), loadAlerts(), loadTasks(), loadServices(), loadAgents(), loadActivity()]);
       document.getElementById('refresh-time').textContent = (performance.now() - start).toFixed(0) + 'ms';
     }
     refreshAll();

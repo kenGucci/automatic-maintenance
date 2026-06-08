@@ -788,6 +788,190 @@ a { color: inherit; text-decoration: none; }
   font-weight: 500;
 }
 
+/* ─── Stats ─── */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+.stat-card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 32px 24px;
+  text-align: center;
+  transition: all 0.3s;
+}
+.stat-card:hover {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.1);
+  transform: translateY(-4px);
+}
+.stat-value {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #f1f5f9;
+  font-family: 'JetBrains Mono', monospace;
+  letter-spacing: -0.02em;
+  margin-bottom: 8px;
+}
+.stat-unit {
+  font-size: 1.25rem;
+  color: #64748b;
+  font-weight: 500;
+}
+.stat-label {
+  font-size: 0.875rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* ─── Testimonials ─── */
+.testimonial-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+.testimonial-card {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 28px;
+  transition: all 0.3s;
+}
+.testimonial-card:hover {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.1);
+  transform: translateY(-4px);
+}
+.testimonial-stars {
+  color: #fbbf24;
+  font-size: 0.875rem;
+  margin-bottom: 12px;
+  letter-spacing: 2px;
+}
+.testimonial-text {
+  font-size: 0.9375rem;
+  color: #94a3b8;
+  line-height: 1.7;
+  margin-bottom: 20px;
+  font-style: italic;
+}
+.testimonial-author {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.testimonial-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.875rem;
+  flex-shrink: 0;
+}
+.testimonial-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+.testimonial-role {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+/* ─── FAQ ─── */
+.faq-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.faq-item {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.faq-item:hover {
+  border-color: rgba(255,255,255,0.1);
+}
+.faq-question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  cursor: pointer;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: #f1f5f9;
+  user-select: none;
+  gap: 16px;
+}
+.faq-chevron {
+  flex-shrink: 0;
+  color: #64748b;
+  transition: transform 0.2s;
+}
+.faq-item.open .faq-chevron {
+  transform: rotate(180deg);
+}
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.3s ease;
+  padding: 0 24px;
+  font-size: 0.875rem;
+  color: #64748b;
+  line-height: 1.7;
+}
+.faq-item.open .faq-answer {
+  max-height: 300px;
+  padding: 0 24px 20px;
+}
+.faq-answer code {
+  background: rgba(129,140,248,0.1);
+  color: #818cf8;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.8125rem;
+}
+
+/* ─── CTA Section ─── */
+.cta-section {
+  padding: 80px 24px;
+  background: linear-gradient(135deg, rgba(30,50,230,0.06), rgba(6,182,212,0.04));
+  border-top: 1px solid rgba(30,50,230,0.1);
+  border-bottom: 1px solid rgba(30,50,230,0.1);
+}
+.cta-inner {
+  max-width: 700px;
+  margin: 0 auto;
+  text-align: center;
+}
+.cta-inner h2 {
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  font-weight: 800;
+  color: #f1f5f9;
+  margin-bottom: 16px;
+}
+.cta-inner p {
+  font-size: 1.0625rem;
+  color: #64748b;
+  margin-bottom: 32px;
+  line-height: 1.7;
+}
+.cta-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
 /* ─── Footer ─── */
 .footer {
   background: #060a12;
@@ -895,6 +1079,10 @@ a { color: inherit; text-decoration: none; }
 
 /* ─── Responsive ─── */
 @media (max-width: 900px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); max-width: 400px; margin: 0 auto; }
+  .testimonial-grid { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
+  .faq-grid { grid-template-columns: 1fr; max-width: 500px; margin: 0 auto; }
+  .cta-buttons { flex-direction: column; }
   .features-grid,
   .pricing-grid {
     grid-template-columns: 1fr;

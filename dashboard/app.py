@@ -210,6 +210,37 @@ def api_settings():
         },
     })
 
+@app.route("/api/activity")
+def api_activity():
+    b = _bucket() + "_act"
+    events = [
+        "Agent Production-Web-01 completed log rotation",
+        "Threshold alert cleared: CPU on Staging-API-02",
+        "Diagnostic engine analyzed 12 service endpoints",
+        "Auto-remediation: disk cleanup on DB-Replica-East",
+        "Health check passed for all 5 agents",
+        "Agent Cache-Cluster-01 flushed expired keys",
+        "Security scan completed: 0 vulnerabilities found",
+        "Backup verification: all snapshots consistent",
+        "Config sync pushed to Worker-Pool-03",
+        "Agent Staging-API-02 rotated access logs",
+        "Docker build cache pruned on Worker-Pool-03",
+        "SSL certificate check: 30 days until expiry",
+        "Memory optimization applied to Production-Web-01",
+        "Network latency spike detected and resolved",
+        "Scheduled maintenance window opened for DB-Replica-East",
+    ]
+    n = int(_v(b + "n", 6, 12, 1))
+    items = []
+    for i in range(n):
+        items.append({
+            "id": i + 1,
+            "message": _pick(events, b + f"ev_{i}", i),
+            "type": _pick(["action", "action", "action", "alert", "info", "success"], b + f"et_{i}", i + 3),
+            "timestamp": _ago(int(_v(b + f"ets_{i}", 10, 3600, i + 7))),
+        })
+    return jsonify({"events": sorted(items, key=lambda x: x["timestamp"], reverse=True)})
+
 @app.route("/api/settings", methods=["POST"])
 def api_update_settings():
     return jsonify({"status": "saved", "message": "Settings updated successfully"})
@@ -257,6 +288,10 @@ def api_agents():
     })
 
 # --- Pro Dashboard Routes ---
+
+@app.route("/docs")
+def api_docs():
+    return render_template("docs.html")
 
 @app.route("/dashboard/pro")
 def pro_dashboard():
