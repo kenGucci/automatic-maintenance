@@ -1,4 +1,4 @@
-# AutoMend — AI Ops with Controlled Autonomy
+# AutoMend  AI Ops with Controlled Autonomy
 
 [![GitHub](https://img.shields.io/badge/GitHub-kenGucci%2Fautomatic--maintenance-1e32e6?logo=github)](https://github.com/kenGucci/automatic-maintenance)
 [![X / Twitter](https://img.shields.io/badge/X-%40Auto__Mend-000?logo=x)](https://x.com/Auto_Mend)
@@ -29,7 +29,7 @@ Stop paging humans for disk cleanup, log rotation, and threshold alerts your mon
 | You already have… | AutoMend adds… |
 |---|---|
 | PagerDuty/OpsGenie alerts | An agent that reads the alert, runs diagnostics, and attempts a fix before waking you up |
-| Cron scripts | Context-aware execution — skips cleanup if disk is fine, escalates if a fix fails |
+| Cron scripts | Context-aware execution skips cleanup if disk is fine, escalates if a fix fails |
 | Dashboards (Grafana, Datadog) | A companion that acts on what the dashboard shows, not just displays it |
 | Runbooks | An agent that follows runbooks automatically and reports what happened |
 
