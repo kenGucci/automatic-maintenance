@@ -1,5 +1,12 @@
 # AutoMend — AI Ops with Controlled Autonomy
 
+[![GitHub](https://img.shields.io/badge/GitHub-kenGucci%2Fautomatic--maintenance-1e32e6?logo=github)](https://github.com/kenGucci/automatic-maintenance)
+[![X / Twitter](https://img.shields.io/badge/X-%40Auto__Mend-000?logo=x)](https://x.com/Auto_Mend)
+[![License](https://img.shields.io/badge/license-ISC-green)](LICENSE)
+[![Node](https://img.shields.io/badge/node-%3E%3D18-339933?logo=node.js)](package.json)
+[![Python](https://img.shields.io/badge/python-%3E%3D3.10-3776AB?logo=python)](pyproject.toml)
+[![Vercel](https://img.shields.io/badge/deployed%20on-Vercel-000?logo=vercel)](https://automatic-maintenance.vercel.app)
+
 Most infra tools tell you something is broken.  
 **AutoMend investigates and fixes it.**
 
@@ -56,15 +63,9 @@ AutoMend is designed for **controlled autonomy**:
 - **Sandboxing**: destructive actions are dry-run first unless explicitly approved
 - **Kill switch**: `AUTO_REMEDIATION=false` puts the agent in read-only mode
 
-## Evidence
+## Dashboard
 
-> **Coming soon:**
-> - [ ] 30s demo clip — AutoMend detecting and fixing a disk spike live
-> - [ ] Before/after screenshot — dashboard alert → resolved notification
-> - [ ] Terminal log of a real incident it handled
-> - [ ] Dashboard screenshot showing health score, alerts, and task history
-
-![Dashboard preview](./dashboard_screenshot.png)
+![AutoMend Dashboard](./dashboard_screenshot.png)
 
 ## Quick start
 
