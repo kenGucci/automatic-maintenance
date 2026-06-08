@@ -7,7 +7,6 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const Logger = require('../utils/Logger');
-const GitlawbClient = require('../integration/GitlawbClient');
 
 const logger = new Logger('MaintenanceAgent');
 
@@ -16,7 +15,6 @@ class MaintenanceAgent {
     this.config = config;
     this.monitor = monitor;
     this.diagnostic = diagnostic;
-    this.gitlawb = new GitlawbClient(config);
     this.running = false;
     this.diagnosticInterval = null;
     this.maintenanceInterval = null;
@@ -36,9 +34,6 @@ class MaintenanceAgent {
 
     this.running = true;
     logger.info('Maintenance agent starting...');
-
-    // Initialize gitlawb integration
-    await this.gitlawb.initialize();
 
     // Start the system monitor
     this.monitor.start();
@@ -94,7 +89,6 @@ class MaintenanceAgent {
       completed_tasks: this.completedTasks.length,
       total_alerts: this.alertHistory.length,
       last_diagnostic: this.diagnostic.lastRun,
-      gitlawb: this.gitlawb.getStatus(),
     };
   }
 
@@ -127,11 +121,6 @@ class MaintenanceAgent {
         await this._autoRemediate(alerts, diagResults);
       }
 
-      // 4.5. Sync to gitlawb if enabled
-      if (this.gitlawb.initialized && alerts.length > 0) {
-        await this._syncToGitlawb(alerts, diagResults);
-      }
-
       // 5. Log summary
       logger.info('Diagnostic cycle complete', {
         status: diagResults.overall_status,
@@ -162,33 +151,6 @@ class MaintenanceAgent {
   }
 
   /**
-   * Sync alerts and diagnostics to gitlawb
-   */
-  async _syncToGitlawb(alerts, diagResults) {
-    try {
-      // Create issues for critical alerts
-      for (const alert of alerts) {
-        if (alert.type === 'critical') {
-          await this.gitlawb.createMaintenanceIssue(alert, diagResults);
-        }
-      }
-
-      // Sync full maintenance report periodically
-      const report = {
-        timestamp: new Date().toISOString(),
-        overall_status: diagResults.overall_status,
-        alerts_count: alerts.length,
-        recommendations_count: diagResults.recommendations.length,
-        metrics_summary: diagResults.metrics_summary,
-      };
-
-      await this.gitlawb.syncMaintenanceReport(report);
-    } catch (error) {
-      logger.error('Failed to sync to gitlawb', error);
-    }
-  }
-
-  /**
    * Attempt automatic remediation for known issues
    */
   async _autoRemediate(alerts, diagResults) {
@@ -208,16 +170,6 @@ class MaintenanceAgent {
             status: 'completed',
           });
           logger.info(`Remediation successful: ${action.name}`);
-
-          // Create PR on gitlawb for the fix
-          if (this.gitlawb.initialized) {
-            await this.gitlawb.createMaintenancePR(
-              `maintenance/${action.name.toLowerCase().replace(/\s+/g, '-')}-${Date.now()}`,
-              `Fix: ${action.name}`,
-              `Automated maintenance fix for: ${alert.message}`,
-              []
-            );
-          }
         } catch (error) {
           this.completedTasks.push({
             name: action.name,

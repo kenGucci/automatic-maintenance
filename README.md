@@ -84,7 +84,7 @@ index.js  (Node.js entry point)
 ├── src/monitor/         SystemMonitor — collects CPU, memory, disk, network
 ├── src/diagnostic/      DiagnosticEngine — analyzes health, suggests fixes
 ├── src/config/          ConfigManager — env-based configuration
-├── src/integration/     GitlawbClient — optional GitLawb issue/PR sync
+
 
 maintenance_crew.py      CrewAI multi-agent system (optional)
 dashboard/               Flask web dashboard (8 API endpoints)
