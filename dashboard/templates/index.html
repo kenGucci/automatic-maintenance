@@ -72,6 +72,7 @@
       <div class="nav-links">
         <a href="#features">Features</a>
         <a href="#how-it-works">How It Works</a>
+        <a href="#architecture">Architecture</a>
         <a href="#agents">Agents</a>
         <a href="#pricing">Pricing</a>
         <a href="/dashboard">Dashboard</a>
@@ -221,6 +222,188 @@
     </div>
   </section>
 
+  <section class="section" id="architecture">
+    <div class="section-inner">
+      <div class="section-label">Architecture</div>
+      <h2 class="section-title">How AutoMend works<br/>under the hood</h2>
+      <p class="section-desc">A modular agent architecture that monitors, diagnoses, and remediates — all with configurable safety boundaries.</p>
+      <div class="arch-grid">
+        <div class="arch-node arch-node-input">
+          <div class="arch-node-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          </div>
+          <h3>System Monitor</h3>
+          <p>Collects CPU, memory, disk, and network metrics every 30s. Detects anomalies against configurable thresholds.</p>
+          <div class="arch-tags">
+            <span class="arch-tag">CPU</span>
+            <span class="arch-tag">Memory</span>
+            <span class="arch-tag">Disk</span>
+            <span class="arch-tag">Network</span>
+          </div>
+        </div>
+        <div class="arch-arrow">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+        <div class="arch-node arch-node-process">
+          <div class="arch-node-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          </div>
+          <h3>Diagnostic Engine</h3>
+          <p>Analyzes metrics against baselines, identifies root causes, and recommends remediation actions.</p>
+          <div class="arch-meta">Health score · Alert correlation · Root cause analysis</div>
+        </div>
+        <div class="arch-arrow">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </div>
+        <div class="arch-node arch-node-action">
+          <div class="arch-node-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <h3>Remediation Engine</h3>
+          <p>Executes fixes with configurable safety — auto-approve, require approval, or dry-run only for destructive actions.</p>
+          <div class="arch-tags">
+            <span class="arch-tag arch-tag-green">Auto</span>
+            <span class="arch-tag arch-tag-yellow">Approval</span>
+            <span class="arch-tag arch-tag-blue">Dry-run</span>
+          </div>
+        </div>
+      </div>
+      <div class="arch-flow-footer">
+        <div class="arch-flow-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <span>Audit trail on every action</span>
+        </div>
+        <div class="arch-flow-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <span>Rollback capability with state snapshots</span>
+        </div>
+        <div class="arch-flow-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <span>Configurable kill switch (read-only mode)</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-dark" id="stack">
+    <div class="section-inner">
+      <div class="section-label">Tech Stack</div>
+      <h2 class="section-title">Built with modern,<br/>battle-tested tools</h2>
+      <p class="section-desc">From Node.js orchestration to AI-powered multi-agent systems.</p>
+      <div class="stack-grid">
+        <div class="stack-card">
+          <div class="stack-icon" style="background:rgba(129,140,248,0.1);color:#818cf8;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M11.998 24c-3.62 0-6.58-1.15-8.86-3.46-2.28-2.3-3.42-5.27-3.42-8.88 0-3.65 1.14-6.63 3.44-8.92C5.5.46 8.48-.2 12.1.06c.46.04.66.31.62.83-.04.48-.31.7-.82.66-2.72-.24-5.17.34-7.36 1.73-2.2 1.4-3.66 3.47-4.37 6.2-.7 2.74-.35 5.32 1.05 7.73 1.4 2.42 3.5 4.02 6.27 4.8 2.78.79 5.47.36 8.06-1.3.44-.28.78-.3 1.02-.07.25.23.28.58.1 1.05-.75 2.1-2.08 3.63-4 4.6-1.92.97-3.9 1.33-5.93 1.1z"/></svg>
+          </div>
+          <h3>Node.js</h3>
+          <p>Core agent orchestration, monitoring loops, and event-driven architecture.</p>
+        </div>
+        <div class="stack-card">
+          <div class="stack-icon" style="background:rgba(6,182,212,0.1);color:#22d3ee;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+          </div>
+          <h3>Python / Flask</h3>
+          <p>Dashboard server, REST API endpoints, and WebSocket streaming.</p>
+        </div>
+        <div class="stack-card">
+          <div class="stack-icon" style="background:rgba(16,185,129,0.1);color:#10b981;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          </div>
+          <h3>CrewAI</h3>
+          <p>Multi-agent AI orchestration — Senior Researcher, Coder, and Reviewer agents working together.</p>
+        </div>
+        <div class="stack-card">
+          <div class="stack-icon" style="background:rgba(245,158,11,0.1);color:#fbbf24;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <h3>Chart.js</h3>
+          <p>Real-time interactive charts for system metrics, health scores, and performance analytics.</p>
+        </div>
+        <div class="stack-card">
+          <div class="stack-icon" style="background:rgba(168,85,247,0.1);color:#a855f7;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          </div>
+          <h3>GitHub Actions</h3>
+          <p>CI/CD pipeline runs daily maintenance at 3 AM UTC. Automated tests and deployment.</p>
+        </div>
+        <div class="stack-card">
+          <div class="stack-icon" style="background:rgba(236,72,153,0.1);color:#f472b6;">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <h3>Vercel</h3>
+          <p>Serverless Flask deployment with Python runtime. Global edge network for low-latency API access.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="quickstart">
+    <div class="section-inner">
+      <div class="section-label">Quick Start</div>
+      <h2 class="section-title">Get AutoMend running<br/>in under a minute</h2>
+      <p class="section-desc">One command to start monitoring. A few more to unlock the full stack.</p>
+      <div class="qs-grid">
+        <div class="qs-step">
+          <div class="qs-number">1</div>
+          <h3>Install &amp; Start</h3>
+          <div class="qs-code">git clone https://github.com/kenGucci/automatic-maintenance.git
+cd automatic-maintenance
+npm install
+npm start</div>
+        </div>
+        <div class="qs-step">
+          <div class="qs-number">2</div>
+          <h3>Launch Dashboard</h3>
+          <div class="qs-code">pip install flask gunicorn
+python3 dashboard/app.py</div>
+          <p class="qs-hint">Dashboard at <strong>http://localhost:8080</strong></p>
+        </div>
+        <div class="qs-step">
+          <div class="qs-number">3</div>
+          <h3>Configure</h3>
+          <div class="qs-code">cp .env.example .env
+# Edit thresholds, notifications
+# and safety boundaries</div>
+          <p class="qs-hint">Set <code>AUTO_REMEDIATION=false</code> for read-only mode</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-dark" id="community">
+    <div class="section-inner">
+      <div class="section-label">Open Source</div>
+      <h2 class="section-title">Built in public,<br/>for the community</h2>
+      <p class="section-desc">AutoMend is open source and free to use. Contributions, issues, and stars are welcome.</p>
+      <div class="community-grid">
+        <a href="https://github.com/kenGucci/automatic-maintenance" target="_blank" class="community-card">
+          <div class="community-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+          </div>
+          <h3>GitHub</h3>
+          <p>Star the repo, open issues, submit PRs. All contributions are valued.</p>
+          <span class="community-link">github.com/kenGucci/automatic-maintenance &rarr;</span>
+        </a>
+        <a href="https://x.com/Auto_Mend" target="_blank" class="community-card">
+          <div class="community-icon">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </div>
+          <h3>X / Twitter</h3>
+          <p>Follow for updates, release notes, and community highlights.</p>
+          <span class="community-link">@Auto_Mend &rarr;</span>
+        </a>
+        <div class="community-card">
+          <div class="community-icon" style="background:rgba(16,185,129,0.1);color:#10b981;">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          </div>
+          <h3>ISC Licensed</h3>
+          <p>Free to use, modify, and distribute. Open source from day one.</p>
+          <span class="community-link">Fully permissive license</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="section" id="agents">
     <div class="section-inner">
       <div class="section-label">Multi-Agent System</div>
@@ -363,22 +546,29 @@
         <div class="footer-col">
           <h4>Product</h4>
           <a href="#features">Features</a>
+          <a href="#architecture">Architecture</a>
           <a href="#agents">Agents</a>
           <a href="#pricing">Pricing</a>
           <a href="/dashboard">Dashboard</a>
         </div>
         <div class="footer-col">
-          <h4>Community</h4>
+          <h4>Resources</h4>
+          <a href="#quickstart">Quick Start</a>
+          <a href="#stack">Tech Stack</a>
+          <a href="#community">Community</a>
+          <a href="https://github.com/kenGucci/automatic-maintenance" target="_blank">GitHub</a>
+        </div>
+        <div class="footer-col">
+          <h4>Connect</h4>
           <a href="https://github.com/kenGucci/automatic-maintenance" target="_blank">GitHub</a>
           <a href="https://x.com/Auto_Mend" target="_blank">X / Twitter</a>
-          <a href="mailto:bankreasywins@gmail.com">Email</a>
         </div>
         <div class="footer-col">
           <h4>Stack</h4>
           <span>Node.js</span>
-          <span>Python / CrewAI</span>
-          <span>Flask</span>
-          <span>GitHub Actions</span>
+          <span>Python / Flask</span>
+          <span>CrewAI</span>
+          <span>Vercel</span>
         </div>
       </div>
     </div>
@@ -403,7 +593,7 @@
       <h2 id="modal-title">Subscribe</h2>
       <div class="plan-name" id="modal-plan">Pro Starter</div>
       <div class="price" id="modal-price">$10<span>/mo</span></div>
-      <input type="email" placeholder="Email address" id="modal-email" value="bankreasywins@gmail.com" />
+      <input type="email" placeholder="Email address" id="modal-email" />
       <input type="text" placeholder="Card number" value="4242 4242 4242 4242" disabled style="opacity:0.5;" />
       <button class="btn btn-primary" onclick="processPayment()">Subscribe Now</button>
       <div class="modal-footer">Secure payment. Cancel anytime.</div>
