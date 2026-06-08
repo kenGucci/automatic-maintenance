@@ -5,7 +5,19 @@
 [![License](https://img.shields.io/badge/license-ISC-green)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D18-339933?logo=node.js)](package.json)
 [![Python](https://img.shields.io/badge/python-%3E%3D3.10-3776AB?logo=python)](pyproject.toml)
+[![Docker](https://img.shields.io/badge/docker-ready-2496ED?logo=docker)](Dockerfile)
 [![Vercel](https://img.shields.io/badge/deployed%20on-Vercel-000?logo=vercel)](https://automatic-maintenance.vercel.app)
+[![Live Demo](https://img.shields.io/badge/live-dashboard-818cf8?logo=vercel)](https://automatic-maintenance.vercel.app/dashboard)
+[![Contributors](https://img.shields.io/badge/contributors-welcome-brightgreen)](/CONTRIBUTING.md)
+
+<div align="center">
+  <a href="https://automatic-maintenance.vercel.app" target="_blank"><b>Live Dashboard</b></a> &nbsp;·&nbsp;
+  <a href="https://automatic-maintenance.vercel.app/docs" target="_blank">API Docs</a> &nbsp;·&nbsp;
+  <a href="https://automatic-maintenance.vercel.app/dashboard/pro" target="_blank">Pro Dashboard</a> &nbsp;·&nbsp;
+  <a href="/CHANGELOG.md">Changelog</a>
+</div>
+
+---
 
 Most infra tools tell you something is broken.  
 **AutoMend investigates and fixes it.**
@@ -69,12 +81,19 @@ AutoMend is designed for **controlled autonomy**:
 
 ## Quick start
 
+### npm + pip
 ```bash
 npm install
-pip install flask crewai crewai-tools
+pip install flask gunicorn
 cp .env.example .env
 npm start                 # starts the agent
 python3 dashboard/app.py  # starts the dashboard at http://127.0.0.1:8080
+```
+
+### Docker
+```bash
+docker compose up -d
+# Dashboard at http://127.0.0.1:8080
 ```
 
 ## Architecture
@@ -92,6 +111,27 @@ dashboard/               Flask web dashboard (8 API endpoints)
 .github/workflows/       Daily CI/CD at 3 AM UTC
 ```
 
+## Built with
+
+| Layer | Technology |
+|---|---|
+| Agent runtime | Node.js 20, native EventEmitter architecture |
+| AI orchestration | CrewAI (optional multi-agent system) |
+| Dashboard | Python 3.11, Flask, Gunicorn |
+| Charts | Chart.js 4 with real-time data |
+| Deployment | Vercel serverless Python |
+| CI/CD | GitHub Actions (daily at 3 AM UTC) |
+| Containerization | Docker, Docker Compose |
+
+## Testing
+
+```bash
+pip install pytest
+python3 -m pytest dashboard/
+```
+
+All endpoints return JSON. Data is deterministic within 5-minute windows (MD5-hash bucketed).
+
 ## Configuration
 
 | Variable | Default | Description |
@@ -106,10 +146,14 @@ Alert thresholds (configurable via dashboard):
 - Memory: warning 75%, critical 95%
 - Disk: warning 80%, critical 95%
 
+## Contributing
+
+See [CONTRIBUTING.md](/CONTRIBUTING.md) for how to get started. All contributions — bug reports, feature requests, docs, and PRs — are welcome.
+
 ## License
 
-ISC
+ISC — see [LICENSE](/LICENSE).
 
 ## Author
 
-Built by **kenGucci**
+Built by **kenGucci** · [@suggestionii](https://x.com/suggestionii)
