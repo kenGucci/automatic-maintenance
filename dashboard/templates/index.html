@@ -83,8 +83,9 @@
       <div class="nav-links">
         <a href="#features">Features</a>
         <a href="#how-it-works">How It Works</a>
-        <a href="#architecture">Architecture</a>
-        <a href="#agents">Agents</a>
+          <a href="#architecture">Architecture</a>
+          <a href="#demo">Demo</a>
+          <a href="#agents">Agents</a>
         <a href="#pricing">Pricing</a>
         <a href="#testimonials">Testimonials</a>
         <a href="#faq">FAQ</a>
@@ -378,6 +379,43 @@ python3 dashboard/app.py</div>
 # Edit thresholds, notifications
 # and safety boundaries</div>
           <p class="qs-hint">Set <code>AUTO_REMEDIATION=false</code> for read-only mode</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="demo">
+    <div class="section-inner">
+      <div class="section-label">Demo</div>
+      <h2 class="section-title">See AutoMend<br/>in action</h2>
+      <p class="section-desc">Watch how the dashboard monitors, diagnoses, and remediates in real time.</p>
+      <div class="demo-player" onclick="openDemoModal()">
+        <div class="demo-bg">
+          <div class="demo-graph">
+            <div class="demo-line" style="width:80%;height:3px;top:35%;background:linear-gradient(90deg,#1e32e6,#818cf8);"></div>
+            <div class="demo-line" style="width:65%;height:2px;top:52%;background:linear-gradient(90deg,#22d3ee,#34d399);"></div>
+            <div class="demo-line" style="width:45%;height:2px;top:68%;background:linear-gradient(90deg,#fbbf24,#f472b6);"></div>
+            <div class="demo-dot" style="left:80%;top:35%;"></div>
+            <div class="demo-dot" style="left:65%;top:52%;"></div>
+            <div class="demo-dot" style="left:45%;top:68%;"></div>
+          </div>
+          <div class="demo-status">
+            <span class="demo-status-dot"></span>
+            <span>System Healthy — 5 agents online</span>
+          </div>
+          <div class="demo-metrics">
+            <div><span>CPU</span><span class="demo-val">42%</span></div>
+            <div><span>Memory</span><span class="demo-val">67%</span></div>
+            <div><span>Disk</span><span class="demo-val">34%</span></div>
+            <div><span>Uptime</span><span class="demo-val">96h</span></div>
+          </div>
+        </div>
+        <div class="demo-play">
+          <div class="demo-play-ring"></div>
+          <div class="demo-play-btn">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><polygon points="8 5 19 12 8 19 8 5" fill="white"/></svg>
+          </div>
+          <span class="demo-play-label">Watch Demo</span>
         </div>
       </div>
     </div>
@@ -709,7 +747,8 @@ python3 dashboard/app.py</div>
         <div class="footer-col">
           <h4>Product</h4>
           <a href="#features">Features</a>
-          <a href="#architecture">Architecture</a>
+        <a href="#architecture">Architecture</a>
+        <a href="#demo">Demo</a>
           <a href="#agents">Agents</a>
           <a href="#pricing">Pricing</a>
           <a href="#testimonials">Testimonials</a>
@@ -720,6 +759,7 @@ python3 dashboard/app.py</div>
           <h4>Resources</h4>
           <a href="#quickstart">Quick Start</a>
           <a href="#stack">Tech Stack</a>
+          <a href="#demo">Demo</a>
           <a href="#community">Community</a>
           <a href="#faq">FAQ</a>
           <a href="https://github.com/kenGucci/automatic-maintenance" target="_blank">GitHub</a>
@@ -752,6 +792,21 @@ python3 dashboard/app.py</div>
       </div>
     </div>
   </footer>
+
+  <div class="demo-modal" id="demo-modal">
+    <div class="demo-modal-inner">
+      <button class="demo-modal-close" onclick="closeDemoModal()">&times;</button>
+      <div class="demo-modal-content">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-bottom:16px;opacity:0.4;"><rect x="2" y="2" width="20" height="20" rx="4"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg>
+        <h3>Demo Video Coming Soon</h3>
+        <p>We're putting the finishing touches on our demo reel.<br/>In the meantime, explore the live dashboard.</p>
+        <a href="/dashboard" class="btn btn-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          Open Dashboard
+        </a>
+      </div>
+    </div>
+  </div>
 
   <div class="modal-overlay" id="subscribe-modal">
     <div class="modal">
@@ -811,6 +866,10 @@ python3 dashboard/app.py</div>
       }
     }
     loadHeroStats();
+
+    function openDemoModal() { document.getElementById('demo-modal').classList.add('open'); }
+    function closeDemoModal() { document.getElementById('demo-modal').classList.remove('open'); }
+    document.getElementById('demo-modal').addEventListener('click', function(e) { if (e.target === this) closeDemoModal(); });
 
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', function (e) {
