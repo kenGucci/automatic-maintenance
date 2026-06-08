@@ -1,7 +1,7 @@
 {
   "name": "automatic-maintenance",
   "version": "1.0.0",
-  "description": "Automatic Maintenance is an autonomous AI agent designed to monitor, diagnose, and optimize systems without constant human intervention. It proactively detects issues, performs routine maintenance tasks, tracks performance metrics, and recommends or executes fixes before problems escalate.",
+  "description": "AutoMend — AI Ops with Controlled Autonomy. Most infra tools tell you something is broken. AutoMend investigates and fixes it.",
   "main": "index.js",
   "scripts": {
     "test": "node --test src/test/*.test.js",
