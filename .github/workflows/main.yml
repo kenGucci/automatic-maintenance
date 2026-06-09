@@ -59,10 +59,10 @@ jobs:
       - name: Install Python deps
         run: pip install -r requirements.txt
 
-      - name: JS tests
+      - name: Run Node.js tests
         run: npm test
 
-      - name: Python tests
+      - name: Run Python tests
         run: python -m unittest discover -s tests -v
 
       - name: Security audit
@@ -80,7 +80,7 @@ jobs:
       - uses: actions/setup-python@v5
         with: { python-version: '3.12', cache: 'pip' }
       - run: pip install -r requirements.txt
-      - name: Run agent
+      - name: Run Automatic Maintenance Agent
         run: npm run maintenance
         env:
           NODE_ENV: production

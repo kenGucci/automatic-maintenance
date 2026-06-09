@@ -25,6 +25,16 @@ class ConfigManager {
       securityScan: 'daily',
       backup: 'daily',
     },
+    notification: {
+      slackWebhookUrl: null,
+      smtpHost: null,
+      smtpPort: 587,
+      smtpUser: null,
+      smtpPass: null,
+      emailFrom: null,
+      emailTo: null,
+    },
+    remoteHosts: [],
   };
 
   static load() {
@@ -56,6 +66,24 @@ class ConfigManager {
     // Notification channels
     if (process.env.NOTIFICATION_CHANNELS) {
       config.notificationChannels = process.env.NOTIFICATION_CHANNELS.split(',').map((c) => c.trim());
+    }
+
+    config.notification.slackWebhookUrl = process.env.SLACK_WEBHOOK_URL || null;
+    config.notification.smtpHost = process.env.SMTP_HOST || null;
+    config.notification.smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
+    config.notification.smtpUser = process.env.SMTP_USER || null;
+    config.notification.smtpPass = process.env.SMTP_PASS || null;
+    config.notification.emailFrom = process.env.EMAIL_FROM || null;
+    config.notification.emailTo = process.env.EMAIL_TO || null;
+
+    // Remote hosts
+    if (process.env.REMOTE_HOSTS) {
+      config.remoteHosts = process.env.REMOTE_HOSTS.split(',').map(h => ({
+        host: h.trim(),
+        port: parseInt(process.env[`SSH_PORT_${h.trim().toUpperCase().replace(/[^a-zA-Z0-9]/g, '_')}`] || '22', 10),
+        username: process.env[`SSH_USER_${h.trim().toUpperCase().replace(/[^a-zA-Z0-9]/g, '_')}`] || 'root',
+        privateKeyPath: process.env.SSH_KEY_PATH || null,
+      }));
     }
 
     return config;

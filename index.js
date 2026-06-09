@@ -75,6 +75,20 @@ process.on('SIGTERM', () => {
   process.exit(0);
 });
 
+    // Log remote hosts config
+if (config.remoteHosts && config.remoteHosts.length > 0) {
+  logger.info(`🌐 Monitoring ${config.remoteHosts.length} remote host(s)`, {
+    hosts: config.remoteHosts.map(h => h.host),
+  });
+}
+
+// Log notification config
+const notifier = new (require('./src/utils/Notifier'))(config.notification || {});
+logger.info('📬 Notification channels', {
+  slack: !!config.notification?.slackWebhookUrl,
+  email: !!config.notification?.emailTo,
+});
+
 // Start the application
 bootstrap().catch((error) => {
   logger.error('🔥 Fatal error', error);
