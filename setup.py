@@ -1,10 +1,13 @@
 from setuptools import setup, find_packages
 
+with open("README.md", encoding="utf-8") as f:
+    long_description = f.read()
+
 setup(
     name="automend",
     version="1.0.0",
     description="Autonomous system maintenance agent with AI-powered diagnostics",
-    long_description=open("README.md").read(),
+    long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/kenGucci/automatic-maintenance",
     author="kenGucci",

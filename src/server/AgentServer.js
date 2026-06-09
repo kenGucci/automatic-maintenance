@@ -48,6 +48,10 @@ class AgentServer {
       }
     });
 
+    this.server.on('error', (err) => {
+      logger.error('Failed to start API server', { error: err.message });
+    });
+
     this.server.listen(this.port, () => {
       logger.info(`Agent API server listening on port ${this.port}`);
     });
