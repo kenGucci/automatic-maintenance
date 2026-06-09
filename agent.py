@@ -1,6 +1,6 @@
-import os, sys, json, time, shutil, socket, hashlib, math, tempfile
+import os, sys, json, time, socket, tempfile
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from datetime import datetime, timedelta
+from datetime import datetime
 from urllib.parse import urlparse
 
 try:
@@ -17,8 +17,8 @@ class Logger:
         self.ctx = ctx
     def log(self, level, msg, **kw):
         ts = datetime.utcnow().isoformat()
-        extra = ' ' + json.dumps(kw) if kw else ''
-        print(f'{{"timestamp":"{ts}","level":"{level}","context":"{self.ctx}","message":"{msg}"{extra[1:] if extra else ""}', file=sys.stderr)
+        entry = {'timestamp': ts, 'level': level, 'context': self.ctx, 'message': msg, **kw}
+        print(json.dumps(entry), file=sys.stderr)
     def info(self, msg, **kw): self.log('info', msg, **kw)
     def warn(self, msg, **kw): self.log('warn', msg, **kw)
     def error(self, msg, **kw): self.log('error', msg, **kw)
@@ -27,17 +27,18 @@ logger = Logger()
 
 class MetricsCollector:
     def __init__(self):
-        self._prev_cpu = None
         self._history = []
         self.max_history = 1440
         self.metrics = None
-        self._interval_id = None
 
     def start(self):
         self.collect()
         logger.info(f'Metrics collector started (interval={INTERVAL}s)')
 
     def collect(self):
+        if psutil is None:
+            logger.error('psutil not installed, cannot collect metrics')
+            return None
         try:
             cpu_percent = psutil.cpu_percent(interval=0.5)
             mem = psutil.virtual_memory()
@@ -129,7 +130,7 @@ class Remediation:
 
     def clean_temp(self):
         cleaned = 0
-        tmp = tempfile.gettempdir() if 'tempfile' in sys.modules else '/tmp'
+        tmp = tempfile.gettempdir()
         if os.path.isdir(tmp):
             for f in os.listdir(tmp):
                 fp = os.path.join(tmp, f)
