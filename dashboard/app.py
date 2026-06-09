@@ -298,10 +298,6 @@ def api_agents():
 
 # --- Pro Dashboard Routes ---
 
-@app.route("/docs")
-def api_docs():
-    return render_template("docs.html")
-
 @app.route("/dashboard/pro")
 def pro_dashboard():
     return render_template("pro-dashboard.html")

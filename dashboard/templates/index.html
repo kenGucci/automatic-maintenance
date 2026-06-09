@@ -21,37 +21,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/css/theme.css" />
   <style>
-    .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 1000;
-      display: flex; align-items: center; justify-content: center;
-      opacity: 0; pointer-events: none; transition: opacity 0.2s;
-    }
-    .modal-overlay.open { opacity: 1; pointer-events: all; }
-    .modal {
-      background: hsl(var(--card, 0 0% 6%)); border: 1px solid hsl(var(--border, 0 0% 14%));
-      border-radius: 12px; padding: 32px; max-width: 420px; width: 90%;
-      transform: scale(0.95); transition: transform 0.2s;
-    }
-    .modal-overlay.open .modal { transform: scale(1); }
-    .modal h2 { font-size: 1.25rem; margin-bottom: 4px; }
-    .modal .plan-name { color: #1e32e6; font-weight: 600; font-size: 0.875rem; margin-bottom: 16px; }
-    .modal .price { font-size: 2rem; font-weight: 700; margin-bottom: 20px; }
-    .modal .price span { font-size: 1rem; color: hsl(var(--muted-foreground, #64748b)); }
-    .modal input {
-      width: 100%; padding: 10px 14px; margin-bottom: 12px; border-radius: 8px;
-      border: 1px solid hsl(var(--border, 0 0% 14%));
-      background: hsl(var(--background, 0 0% 3.9%));
-      color: hsl(var(--foreground, 0 0% 98%));
-      font-family: inherit; font-size: 0.875rem;
-    }
-    .modal input:focus { outline: none; border-color: #1e32e6; }
-    .modal .btn { width: 100%; margin-top: 4px; }
-    .modal .close-btn {
-      float: right; background: none; border: none; color: hsl(var(--muted-foreground, #64748b));
-      font-size: 1.25rem; cursor: pointer; padding: 0 4px;
-    }
-    .modal .close-btn:hover { color: hsl(var(--foreground, 0 0% 98%)); }
-    .modal-footer { font-size: 0.75rem; color: hsl(var(--muted-foreground, #64748b)); text-align: center; margin-top: 16px; }
   </style>
 </head>
 <body>
@@ -85,11 +54,10 @@
         <a href="#how-it-works">How It Works</a>
           <a href="#architecture">Architecture</a>
           <a href="#agents">Agents</a>
-        <a href="#pricing">Pricing</a>
         <a href="#testimonials">Testimonials</a>
         <a href="#faq">FAQ</a>
         <a href="/dashboard">Dashboard</a>
-        <a href="/api/overview" target="_blank">API</a>
+        <a href="/dashboard">Dashboard</a>
       </div>
       <div class="nav-actions">
         <a href="https://github.com/kenGucci/automatic-maintenance" target="_blank" class="nav-social">
@@ -478,61 +446,7 @@ python3 dashboard/app.py</div>
     </div>
   </section>
 
-  <section class="section section-dark" id="pricing">
-    <div class="section-inner">
-      <div class="section-label">Pricing</div>
-      <h2 class="section-title">Pro Dashboard — connect multiple<br/>agents &amp; see everything</h2>
-      <p class="section-desc">Monitor maintenance, performance, and analytics across all your agents from one place.</p>
-      <div class="pricing-grid">
-        <div class="pricing-card pricing-featured" onclick="subscribe('pro-starter')" style="cursor:pointer;">
-          <div class="pricing-badge">Pro Starter</div>
-          <h3>Single Agent</h3>
-          <div class="pricing-amount">$10<span>/mo</span></div>
-          <p class="pricing-desc">Connect one agent with full analytics and maintenance tracking.</p>
-          <ul class="pricing-features">
-            <li>Live agent health dashboard</li>
-            <li>Maintenance performance metrics</li>
-            <li>7-day analytics history</li>
-            <li>Real-time alerts</li>
-            <li>Single agent connection</li>
-          </ul>
-          <button class="btn btn-primary" style="width:100%;">Subscribe $10/mo</button>
-        </div>
-        <div class="pricing-card" onclick="subscribe('pro-team')" style="cursor:pointer;">
-          <h3>Pro Team</h3>
-          <div class="pricing-amount">$25<span>/mo</span></div>
-          <p class="pricing-desc">Multiple agents with advanced analytics and cross-agent insights.</p>
-          <ul class="pricing-features">
-            <li>Everything in Pro Starter</li>
-            <li>Up to 5 agent connections</li>
-            <li>Cross-agent performance comparison</li>
-            <li>30-day analytics history</li>
-            <li>Maintenance scheduling</li>
-            <li>Team member invites</li>
-          </ul>
-          <button class="btn btn-primary" style="width:100%;">Subscribe $25/mo</button>
-        </div>
-        <div class="pricing-card" onclick="subscribe('pro-enterprise')" style="cursor:pointer;">
-          <h3>Pro Enterprise</h3>
-          <div class="pricing-amount">$35<span>/mo</span></div>
-          <p class="pricing-desc">Unlimited agents with full analytics, custom dashboards, and priority support.</p>
-          <ul class="pricing-features">
-            <li>Everything in Pro Team</li>
-            <li>Unlimited agent connections</li>
-            <li>Custom dashboard builder</li>
-            <li>90-day analytics history</li>
-            <li>Advanced performance reports</li>
-            <li>Priority support &amp; SLA</li>
-          </ul>
-          <button class="btn btn-primary" style="width:100%;">Subscribe $35/mo</button>
-        </div>
-      </div>
-      <div class="pricing-cta" style="text-align:center;margin-top:32px;">
-        <a href="/dashboard/pro" class="btn btn-primary" style="display:inline-flex;">Try Pro Dashboard Free</a>
-        <span style="display:block;margin-top:8px;font-size:0.8rem;color:hsl(var(--muted-foreground, #64748b));">No credit card required. 14-day free trial.</span>
-      </div>
-    </div>
-  </section>
+
 
   <section class="section section-dark" id="stats">
     <div class="section-inner">
@@ -647,12 +561,12 @@ python3 dashboard/app.py</div>
         </div>
         <div class="faq-item">
           <div class="faq-question" onclick="toggleFaq(this)">
-            <span>Is it free? What's the pricing model?</span>
+            <span>Is AutoMend free to use?</span>
             <span class="faq-chevron">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
             </span>
           </div>
-          <div class="faq-answer">AutoMend is open source (ISC license) and free to use. The Pro Dashboard with multi-agent fleet management starts at $10/mo for a single agent, $25/mo for up to 5 agents, and $35/mo for unlimited agents.</div>
+          <div class="faq-answer">Yes. AutoMend is open source under the ISC license and completely free to use. Self-host it on your own infrastructure with no restrictions.</div>
         </div>
         <div class="faq-item">
           <div class="faq-question" onclick="toggleFaq(this)">
@@ -711,7 +625,6 @@ python3 dashboard/app.py</div>
           <a href="#features">Features</a>
         <a href="#architecture">Architecture</a>
           <a href="#agents">Agents</a>
-          <a href="#pricing">Pricing</a>
           <a href="#testimonials">Testimonials</a>
           <a href="#faq">FAQ</a>
           <a href="/dashboard">Dashboard</a>
@@ -753,50 +666,9 @@ python3 dashboard/app.py</div>
     </div>
   </footer>
 
-  <div class="modal-overlay" id="subscribe-modal">
-    <div class="modal">
-      <button class="close-btn" onclick="closeModal()">&times;</button>
-      <h2 id="modal-title">Subscribe</h2>
-      <div class="plan-name" id="modal-plan">Pro Starter</div>
-      <div class="price" id="modal-price">$10<span>/mo</span></div>
-      <input type="email" placeholder="Email address" id="modal-email" />
-      <input type="text" placeholder="Card number" value="4242 4242 4242 4242" disabled style="opacity:0.5;" />
-      <button class="btn btn-primary" onclick="processPayment()">Subscribe Now</button>
-      <div class="modal-footer">Secure payment. Cancel anytime.</div>
-    </div>
-  </div>
+
 
   <script>
-    let selectedPlan = { id: 'pro-starter', name: 'Pro Starter', price: 10 };
-
-    function subscribe(planId) {
-      const plans = {
-        'pro-starter': { name: 'Pro Starter', price: 10 },
-        'pro-team': { name: 'Pro Team', price: 25 },
-        'pro-enterprise': { name: 'Pro Enterprise', price: 35 },
-      };
-      selectedPlan = plans[planId];
-      document.getElementById('modal-title').textContent = 'Subscribe to ' + selectedPlan.name;
-      document.getElementById('modal-plan').textContent = selectedPlan.name;
-      document.getElementById('modal-price').innerHTML = '$' + selectedPlan.price + '<span>/mo</span>';
-      document.getElementById('subscribe-modal').classList.add('open');
-    }
-
-    function closeModal() {
-      document.getElementById('subscribe-modal').classList.remove('open');
-    }
-
-    function processPayment() {
-      const email = document.getElementById('modal-email').value;
-      if (!email) { alert('Please enter your email.'); return; }
-      closeModal();
-      window.location.href = '/dashboard/pro?plan=' + selectedPlan.id + '&email=' + encodeURIComponent(email);
-    }
-
-    document.getElementById('subscribe-modal').addEventListener('click', function(e) {
-      if (e.target === this) closeModal();
-    });
-
     async function loadHeroStats() {
       try {
         const res = await fetch('/api/overview');

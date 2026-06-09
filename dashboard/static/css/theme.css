@@ -484,98 +484,7 @@ a { color: inherit; text-decoration: none; }
   font-weight: 500;
 }
 
-/* ─── Pricing ─── */
-.pricing-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
-}
 
-.pricing-card {
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 14px;
-  padding: 32px;
-  display: flex;
-  flex-direction: column;
-}
-
-.pricing-featured {
-  border-color: rgba(30, 50, 230, 0.3);
-  background: rgba(30, 50, 230, 0.04);
-  position: relative;
-}
-
-.pricing-badge {
-  position: absolute;
-  top: -12px;
-  left: 50%;
-  transform: translateX(-50%);
-  padding: 4px 16px;
-  border-radius: 100px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: white;
-  background: #1e32e6;
-  white-space: nowrap;
-}
-
-.pricing-card h3 {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #f1f5f9;
-  margin-bottom: 16px;
-}
-
-.pricing-amount {
-  font-size: 2.5rem;
-  font-weight: 800;
-  color: #f1f5f9;
-  margin-bottom: 8px;
-  letter-spacing: -0.02em;
-}
-
-.pricing-amount span {
-  font-size: 1rem;
-  font-weight: 500;
-  color: #64748b;
-}
-
-.pricing-desc {
-  font-size: 0.875rem;
-  color: #64748b;
-  line-height: 1.6;
-  margin-bottom: 24px;
-}
-
-.pricing-features {
-  list-style: none;
-  margin-bottom: 24px;
-  flex: 1;
-}
-
-.pricing-features li {
-  padding: 8px 0;
-  font-size: 0.875rem;
-  color: #94a3b8;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.pricing-features li::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #1e32e6;
-  flex-shrink: 0;
-}
-
-.pricing-card .btn {
-  width: 100%;
-  justify-content: center;
-}
 
 /* ─── Architecture ─── */
 .arch-grid {
@@ -1083,8 +992,7 @@ a { color: inherit; text-decoration: none; }
   .testimonial-grid { grid-template-columns: 1fr; max-width: 400px; margin: 0 auto; }
   .faq-grid { grid-template-columns: 1fr; max-width: 500px; margin: 0 auto; }
   .cta-buttons { flex-direction: column; }
-  .features-grid,
-  .pricing-grid {
+  .features-grid {
     grid-template-columns: 1fr;
     max-width: 400px;
     margin-left: auto;
@@ -1132,5 +1040,4 @@ a { color: inherit; text-decoration: none; }
     gap: 24px;
   }
 
-  .pricing-card { padding: 24px; }
 }
