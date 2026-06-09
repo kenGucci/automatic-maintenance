@@ -130,6 +130,25 @@
     .chatbot-send:disabled { opacity: 0.4; cursor: not-allowed; }
     .chatbot-send:not(:disabled):hover { opacity: 0.9; }
     .chatbot-send svg { width: 18px; height: 18px; color: #fff; }
+    .chatbot-mic {
+      width: 40px; height: 40px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03); cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s; flex-shrink: 0;
+    }
+    .chatbot-mic:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15); }
+    .chatbot-mic.listening { background: rgba(239,68,68,0.2); border-color: #ef4444; animation: micPulse 1s ease-in-out infinite; }
+    @keyframes micPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); } 50% { box-shadow: 0 0 0 8px rgba(239,68,68,0); } }
+    .chatbot-mic svg { width: 18px; height: 18px; color: #94a3b8; }
+    .chatbot-mic.listening svg { color: #ef4444; }
+    .chatbot-speaker {
+      background: none; border: none; color: #64748b; cursor: pointer;
+      padding: 2px 4px; display: inline-flex; align-items: center;
+      transition: color 0.2s; margin-left: auto; flex-shrink: 0;
+    }
+    .chatbot-speaker:hover { color: #e2e8f0; }
+    .chatbot-speaker svg { width: 14px; height: 14px; }
+    .chatbot-msg.bot .chatbot-msg-bubble { display: flex; align-items: flex-start; gap: 8px; }
     .chatbot-suggestions {
       display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 16px 4px;
     }
@@ -833,7 +852,10 @@ python3 dashboard/app.py</div>
     <div class="chatbot-messages" id="chatbot-messages"></div>
     <div class="chatbot-suggestions" id="chatbot-suggestions"></div>
     <div class="chatbot-input-area">
-      <input class="chatbot-input" id="chatbot-input" type="text" placeholder="Ask about AutoMend..." autocomplete="off">
+      <input class="chatbot-input" id="chatbot-input" type="text" placeholder="Ask anything..." autocomplete="off">
+      <button class="chatbot-mic" id="chatbot-mic" aria-label="Voice input" style="display:none;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      </button>
       <button class="chatbot-send" id="chatbot-send" disabled aria-label="Send message">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       </button>
@@ -850,7 +872,14 @@ python3 dashboard/app.py</div>
     const messages = document.getElementById('chatbot-messages');
     const input = document.getElementById('chatbot-input');
     const sendBtn = document.getElementById('chatbot-send');
+    const micBtn = document.getElementById('chatbot-mic');
     const suggestions = document.getElementById('chatbot-suggestions');
+    let isListening = false;
+    let isProcessing = false;
+
+    if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+      micBtn.style.display = 'flex';
+    }
 
     function addMessage(text, role) {
       const div = document.createElement('div');
@@ -860,7 +889,16 @@ python3 dashboard/app.py</div>
       avatar.textContent = role === 'bot' ? 'A' : 'U';
       const bubble = document.createElement('div');
       bubble.className = 'chatbot-msg-bubble';
-      bubble.textContent = text;
+      const txt = document.createElement('span');
+      txt.textContent = text;
+      bubble.appendChild(txt);
+      if (role === 'bot' && window.speechSynthesis) {
+        const spk = document.createElement('button');
+        spk.className = 'chatbot-speaker';
+        spk.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>';
+        spk.addEventListener('click', () => speakText(text));
+        bubble.appendChild(spk);
+      }
       div.appendChild(avatar);
       div.appendChild(bubble);
       messages.appendChild(div);
@@ -878,36 +916,72 @@ python3 dashboard/app.py</div>
       });
     }
 
-    function handleChat(query) {
-      if (!query.trim()) return;
+    async function handleChat(query) {
+      if (!query.trim() || isProcessing) return;
+      isProcessing = true;
+      sendBtn.disabled = true;
       addMessage(query, 'user');
       input.value = '';
-      sendBtn.disabled = true;
-      setTimeout(() => {
-        const res = autoMendChat(query);
-        addMessage(res.answer, 'bot');
-        if (!res.matched) showSuggestions();
-      }, 400);
+      const res = await autoMendChat(query);
+      addMessage(res.answer, 'bot');
+      if (!res.matched) showSuggestions();
+      isProcessing = false;
     }
+
+    function startListening() {
+      if (!window.SpeechRecognition && !window.webkitSpeechRecognition) return;
+      const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const rec = new Recognition();
+      rec.lang = 'en-US';
+      rec.interimResults = false;
+      rec.maxAlternatives = 1;
+      rec.continuous = false;
+
+      rec.onresult = (e) => {
+        const q = e.results[0][0].transcript;
+        isListening = false;
+        micBtn.classList.remove('listening');
+        handleChat(q);
+      };
+
+      rec.onerror = () => {
+        isListening = false;
+        micBtn.classList.remove('listening');
+      };
+
+      rec.onend = () => {
+        isListening = false;
+        micBtn.classList.remove('listening');
+      };
+
+      isListening = true;
+      micBtn.classList.add('listening');
+      rec.start();
+    }
+
+    micBtn.addEventListener('click', () => {
+      if (isListening) return;
+      startListening();
+    });
 
     input.addEventListener('input', () => {
       sendBtn.disabled = !input.value.trim();
     });
 
     input.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && input.value.trim()) {
+      if (e.key === 'Enter' && input.value.trim() && !isProcessing) {
         handleChat(input.value);
       }
     });
 
     sendBtn.addEventListener('click', () => {
-      if (input.value.trim()) handleChat(input.value);
+      if (input.value.trim() && !isProcessing) handleChat(input.value);
     });
 
     btn.addEventListener('click', () => {
       widget.classList.toggle('open');
       if (widget.classList.contains('open') && messages.children.length === 0) {
-        addMessage('Hi! I\'m the AutoMend assistant. Ask me anything about the project!', 'bot');
+        addMessage('Hi! I\'m here to help with any question — about AutoMend, tech, programming, science, or anything else!', 'bot');
         setTimeout(showSuggestions, 100);
       }
     });
