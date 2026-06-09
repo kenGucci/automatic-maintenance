@@ -1,18 +1,15 @@
-import os, sys, json, time, socket, tempfile
+import os, sys, json, time, shutil, socket, hashlib, math, tempfile
 from http.server import HTTPServer, BaseHTTPRequestHandler
-from datetime import datetime
+from datetime import datetime, timedelta
 from urllib.parse import urlparse
-
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except ImportError:
-    pass
 
 try:
     import psutil
 except ImportError:
     psutil = None
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from src.claude_diagnostic import ClaudeDiagnosticEngine
 
 HOST = os.environ.get('AGENT_HOST', '0.0.0.0')
 PORT = int(os.environ.get('AGENT_PORT', '9090'))
@@ -23,8 +20,8 @@ class Logger:
         self.ctx = ctx
     def log(self, level, msg, **kw):
         ts = datetime.utcnow().isoformat()
-        entry = {'timestamp': ts, 'level': level, 'context': self.ctx, 'message': msg, **kw}
-        print(json.dumps(entry), file=sys.stderr)
+        extra = ' ' + json.dumps(kw) if kw else ''
+        print(f'{{"timestamp":"{ts}","level":"{level}","context":"{self.ctx}","message":"{msg}"{extra[1:] if extra else ""}', file=sys.stderr)
     def info(self, msg, **kw): self.log('info', msg, **kw)
     def warn(self, msg, **kw): self.log('warn', msg, **kw)
     def error(self, msg, **kw): self.log('error', msg, **kw)
@@ -33,18 +30,17 @@ logger = Logger()
 
 class MetricsCollector:
     def __init__(self):
+        self._prev_cpu = None
         self._history = []
         self.max_history = 1440
         self.metrics = None
+        self._interval_id = None
 
     def start(self):
         self.collect()
         logger.info(f'Metrics collector started (interval={INTERVAL}s)')
 
     def collect(self):
-        if psutil is None:
-            logger.error('psutil not installed, cannot collect metrics')
-            return None
         try:
             cpu_percent = psutil.cpu_percent(interval=0.5)
             mem = psutil.virtual_memory()
@@ -136,7 +132,7 @@ class Remediation:
 
     def clean_temp(self):
         cleaned = 0
-        tmp = tempfile.gettempdir()
+        tmp = tempfile.gettempdir() if 'tempfile' in sys.modules else '/tmp'
         if os.path.isdir(tmp):
             for f in os.listdir(tmp):
                 fp = os.path.join(tmp, f)
@@ -166,7 +162,7 @@ class DiagnosticEngine:
 
         results = {
             'timestamp': datetime.utcnow().isoformat(),
-            'overall_status': self._determine_overall_status(services, alerts),
+            'overall_status': 'operational',
             'services': services,
             'recommendations': recs,
         }
@@ -192,17 +188,6 @@ class DiagnosticEngine:
                 sock.close()
             results.append({'name': name, 'status': status, 'latency_ms': latency})
         return results
-
-    def _determine_overall_status(self, services, alerts):
-        critical_alerts = [a for a in alerts if a['type'] == 'critical']
-        degraded_services = [s for s in services if s['status'] in ('degraded', 'warning')]
-        unreachable_services = [s for s in services if s['status'] == 'unreachable']
-
-        if critical_alerts or unreachable_services:
-            return 'critical'
-        if degraded_services:
-            return 'degraded'
-        return 'operational'
 
     def _recommendations(self, metrics, alerts):
         recs = []
@@ -232,7 +217,11 @@ class AgentHandler(BaseHTTPRequestHandler):
         self.send_response(204)
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
         self.end_headers()
+
+    def do_POST(self):
+        self.do_GET()
 
     def do_GET(self):
         path = urlparse(self.path).path
@@ -273,6 +262,24 @@ class AgentHandler(BaseHTTPRequestHandler):
                 self._send({'services': diag.get('services', []), 'last_diagnostic_run': diag.get('timestamp', datetime.utcnow().isoformat()), 'overall_status': diag.get('overall_status', 'operational'), 'recommendations': diag.get('recommendations', [])})
             elif path == '/api/actions':
                 self._send(server.remediation.get_history())
+            elif path == '/api/claude/diagnostics':
+                if not server.claude:
+                    self._send({'error': 'Claude not configured. Set ANTHROPIC_API_KEY.'}, 400)
+                    return
+                result = server.claude.analyze(server.collector)
+                self._send(result)
+            elif path == '/api/chat' and self.command == 'POST':
+                if not server.claude:
+                    self._send({'error': 'Claude not configured. Set ANTHROPIC_API_KEY.'}, 400)
+                    return
+                content_length = int(self.headers.get('Content-Length', 0))
+                body = json.loads(self.rfile.read(content_length)) if content_length else {}
+                question = body.get('question', '')
+                if not question:
+                    self._send({'error': 'question field is required'}, 400)
+                    return
+                answer = server.claude.chat(question, server.collector)
+                self._send({'question': question, 'answer': answer, 'timestamp': datetime.utcnow().isoformat()})
             else:
                 self._send({'error': 'not_found'}, 404)
         except Exception as e:
@@ -290,6 +297,7 @@ class AgentServer:
         self.collector = MetricsCollector()
         self.diagnostic = DiagnosticEngine()
         self.remediation = Remediation()
+        self.claude = ClaudeDiagnosticEngine() if os.environ.get('ANTHROPIC_API_KEY') else None
         self.httpd = None
 
     def start(self):

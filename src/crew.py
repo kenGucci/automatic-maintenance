@@ -1,13 +1,18 @@
+import os
 from crewai import Agent, Task, Crew, Process
-from crewai_tools import SerperDevTool
+from langchain_anthropic import ChatAnthropic
 
-search_tool = SerperDevTool()
+llm = ChatAnthropic(
+    model=os.environ.get("CLAUDE_MODEL", "claude-sonnet-4-20250514"),
+    anthropic_api_key=os.environ.get("ANTHROPIC_API_KEY"),
+    temperature=0.3,
+)
 
 researcher = Agent(
     role='Senior Researcher',
     goal='Find accurate and up-to-date information about deployment best practices',
     backstory='You are an expert researcher with deep knowledge of DevOps and system deployment.',
-    tools=[search_tool],
+    llm=llm,
     verbose=True
 )
 
@@ -25,6 +30,9 @@ crew = Crew(
 )
 
 def run():
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        print("Error: ANTHROPIC_API_KEY environment variable is required")
+        return
     result = crew.kickoff()
     print(result)
 

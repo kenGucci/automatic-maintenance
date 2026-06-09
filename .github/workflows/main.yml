@@ -59,10 +59,10 @@ jobs:
       - name: Install Python deps
         run: pip install -r requirements.txt
 
-      - name: Run Node.js tests
+      - name: JS tests
         run: npm test
 
-      - name: Run Python tests
+      - name: Python tests
         run: python -m unittest discover -s tests -v
 
       - name: Security audit

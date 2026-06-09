@@ -1,7 +1,12 @@
+import os
 from crewai import Agent, Task, Crew, Process
-from langchain_openai import ChatOpenAI
+from langchain_anthropic import ChatAnthropic
 
-llm = ChatOpenAI(model="gpt-4o")
+llm = ChatAnthropic(
+    model="claude-sonnet-4-20250514",
+    anthropic_api_key=os.environ.get("ANTHROPIC_API_KEY"),
+    temperature=0.3,
+)
 
 coder = Agent(
     role="Senior Coder",
@@ -32,6 +37,9 @@ review_task = Task(
 )
 
 if __name__ == "__main__":
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        print("Error: ANTHROPIC_API_KEY environment variable is required")
+        exit(1)
     crew = Crew(agents=[coder, reviewer], tasks=[coding_task, review_task], process=Process.sequential, verbose=2)
     result = crew.kickoff()
     print(result)

@@ -289,6 +289,71 @@ def api_activity():
         })
     return jsonify({"events": sorted(items, key=lambda x: x["timestamp"], reverse=True)})
 
+@app.route("/chat")
+def chat_page():
+    return render_template("chat.html")
+
+@app.route("/api/chat", methods=["POST"])
+def api_chat():
+    data = request.get_json(silent=True) or {}
+    question = data.get("question", "")
+    if not question:
+        return jsonify({"error": "question is required"}), 400
+
+    # Try live agent first
+    agent = _try_agent('/api/health')
+    if agent:
+        try:
+            from urllib.request import Request, urlopen
+            req = Request(
+                f'{AGENT_URL}/api/chat',
+                method='POST',
+                data=json.dumps({"question": question}).encode(),
+                headers={'Content-Type': 'application/json', 'User-Agent': 'AutoMend-Dashboard'}
+            )
+            with urlopen(req, timeout=10) as resp:
+                return jsonify(json.loads(resp.read().decode()))
+        except Exception:
+            pass
+
+    # Fallback: use Claude directly from dashboard if ANTHROPIC_API_KEY is set
+    api_key = os.environ.get("ANTHROPIC_API_KEY")
+    if api_key:
+        try:
+            import anthropic
+            client = anthropic.Anthropic(api_key=api_key)
+            b = _bucket()
+            metrics = _generate_metrics(b)
+            alerts = _generate_alerts(b)
+            prompt = f"""You are an expert systems engineer. Answer the user's question based on the current system data.
+
+Current metrics:
+{json.dumps(metrics, indent=2)}
+
+Recent alerts:
+{json.dumps(alerts[:5], indent=2)}
+
+User question: {question}
+
+Answer concisely based on the data."""
+            response = client.messages.create(
+                model=os.environ.get("CLAUDE_MODEL", "claude-sonnet-4-20250514"),
+                max_tokens=800,
+                temperature=0.3,
+                messages=[{"role": "user", "content": prompt}],
+            )
+            return jsonify({
+                "question": question,
+                "answer": response.content[0].text.strip(),
+                "timestamp": datetime.utcnow().isoformat(),
+                "source": "dashboard",
+            })
+        except Exception as e:
+            return jsonify({"error": f"Claude unavailable: {e}"}), 500
+
+    return jsonify({"error": "No Claude backend available. Set ANTHROPIC_API_KEY or start the agent."}), 400
+
+
 @app.route("/api/actions")
 def api_actions():
     data = _try_agent('/api/actions')

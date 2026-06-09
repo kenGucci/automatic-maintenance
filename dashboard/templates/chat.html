@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoMend Chat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col">
+    <nav class="bg-gray-800 border-b border-gray-700 px-6 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <span class="text-xl font-bold text-indigo-400">AutoMend</span>
+            <span class="text-gray-400">AI Chat</span>
+        </div>
+        <a href="/dashboard" class="text-sm text-indigo-400 hover:text-indigo-300">Dashboard</a>
+    </nav>
+
+    <div class="flex-1 flex flex-col max-w-4xl mx-auto w-full p-4">
+        <div id="messages" class="flex-1 overflow-y-auto space-y-4 mb-4 p-4">
+            <div class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold shrink-0">A</div>
+                <div class="bg-gray-800 rounded-lg px-4 py-3 max-w-[80%]">
+                    <p class="text-gray-300">Hello! I'm your AI ops assistant. Ask me about your system health, metrics, alerts, or anything about your infrastructure.</p>
+                    <p class="text-xs text-gray-500 mt-1">Try: "How is my system doing?" or "Any issues I should know about?"</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-gray-800 rounded-lg p-4">
+            <form id="chat-form" class="flex gap-3">
+                <input id="chat-input" type="text" placeholder="Ask about your system..." class="flex-1 bg-gray-700 rounded-lg px-4 py-3 text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <button type="submit" class="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-lg font-medium transition">Send</button>
+            </form>
+            <p id="status" class="text-xs text-gray-500 mt-2 hidden">Thinking...</p>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('chat-form');
+        const input = document.getElementById('chat-input');
+        const messages = document.getElementById('messages');
+        const status = document.getElementById('status');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const question = input.value.trim();
+            if (!question) return;
+
+            input.value = '';
+            addMessage('user', question);
+            status.classList.remove('hidden');
+
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question }),
+                });
+                const data = await res.json();
+                if (data.error) {
+                    addMessage('assistant', 'Error: ' + data.error);
+                } else {
+                    addMessage('assistant', data.answer);
+                }
+            } catch (err) {
+                addMessage('assistant', 'Error: ' + err.message);
+            } finally {
+                status.classList.add('hidden');
+            }
+        });
+
+        function addMessage(role, text) {
+            const div = document.createElement('div');
+            div.className = 'flex items-start gap-3 ' + (role === 'user' ? 'justify-end' : '');
+            if (role === 'user') {
+                div.innerHTML = `
+                    <div class="bg-indigo-700 rounded-lg px-4 py-3 max-w-[80%]">
+                        <p class="text-gray-100">${escapeHtml(text)}</p>
+                    </div>
+                    <div class="w-8 h-8 rounded-full bg-indigo-800 flex items-center justify-center text-sm font-bold shrink-0">U</div>
+                `;
+            } else {
+                div.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-indigo-600 flex items-center justify-center text-sm font-bold shrink-0">A</div>
+                    <div class="bg-gray-800 rounded-lg px-4 py-3 max-w-[80%]">
+                        <p class="text-gray-300">${escapeHtml(text)}</p>
+                    </div>
+                `;
+            }
+            messages.appendChild(div);
+            messages.scrollTop = messages.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const d = document.createElement('div');
+            d.textContent = text;
+            return d.innerHTML;
+        }
+    </script>
+</body>
+</html>

@@ -80,6 +80,12 @@ AutoMend is designed for **controlled autonomy**:
 
 ![AutoMend Dashboard](./dashboard_screenshot.png)
 
+## Demo Video
+
+[⬇ Download demo (48 MB, .mov)](https://automatic-maintenance.vercel.app/static/automend-demo.mov)
+
+Watch the full walkthrough: dashboard monitoring, real-time metrics, diagnostic analysis, and the Claude-powered chat interface.
+
 ## Quick start
 
 ### npm + pip

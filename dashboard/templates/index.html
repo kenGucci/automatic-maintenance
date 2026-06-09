@@ -218,22 +218,28 @@
 
   <section class="section section-dark" id="live-demo">
     <div class="section-inner">
-      <div class="section-label">Live Demo</div>
-      <h2 class="section-title">See the agent<br/>in action</h2>
-      <p class="section-desc">Watch AutoMend detect issues, rotate logs, and clean up disk — automatically.</p>
-      <div class="terminal-section">
+      <div class="section-label">Demo Video</div>
+      <h2 class="section-title">See AutoMend<br/>in action</h2>
+      <p class="section-desc">Watch the dashboard live — monitoring, diagnostics, and AI-powered chat in under 2 minutes.</p>
+      <div class="terminal-section" style="max-width: 800px; margin: 0 auto;">
         <div class="terminal-header">
           <span class="terminal-dot red"></span>
           <span class="terminal-dot yellow"></span>
           <span class="terminal-dot green"></span>
-          <span class="terminal-title">agent — AutoMend v1</span>
+          <span class="terminal-title">automend-demo.mov</span>
         </div>
-        <div class="terminal-body" id="terminal-body">
-          <div><span class="terminal-prompt">$</span> <span class="terminal-cmd">automend start</span></div>
-          <div class="terminal-output">[INFO] Agent booting — 5 modules loaded</div>
-          <div class="terminal-output">[INFO] Monitoring every 30s — thresholds: CPU 70/90, MEM 75/95, DISK 80/95</div>
-          <div class="terminal-output" id="term-line"></div>
+        <div class="terminal-body" style="padding: 0; min-height: auto;">
+          <video controls style="width: 100%; display: block; border-radius: 0 0 14px 14px;" poster="/static/favicon.svg">
+            <source src="/static/automend-demo.mov" type="video/quicktime">
+            Your browser does not support video playback.
+          </video>
         </div>
+      </div>
+      <div style="text-align: center; margin-top: 16px;">
+        <a href="/static/automend-demo.mov" download class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download Demo Video
+        </a>
       </div>
     </div>
   </section>
