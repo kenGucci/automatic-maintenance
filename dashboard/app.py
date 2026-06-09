@@ -289,6 +289,20 @@ def api_activity():
         })
     return jsonify({"events": sorted(items, key=lambda x: x["timestamp"], reverse=True)})
 
+@app.route("/api/actions")
+def api_actions():
+    data = _try_agent('/api/actions')
+    if data is not None:
+        return jsonify(data)
+    actions = [
+        {"name": "Log Rotation", "result": "Rotated 12 log files (freed 412MB)", "timestamp": _ago(180), "status": "completed"},
+        {"name": "Disk Cleanup", "result": "Cleaned 89 temp files (freed 234MB)", "timestamp": _ago(360), "status": "completed"},
+        {"name": "Log Rotation", "result": "Rotated 8 log files (freed 298MB)", "timestamp": _ago(1800), "status": "completed"},
+        {"name": "Cache Flush", "result": "Cleared Redis cache (freed 156MB)", "timestamp": _ago(3600), "status": "completed"},
+        {"name": "Disk Cleanup", "result": "Cleaned 45 temp files (freed 112MB)", "timestamp": _ago(7200), "status": "completed"},
+    ]
+    return jsonify(actions)
+
 @app.route("/api/settings", methods=["POST"])
 def api_update_settings():
     return jsonify({"status": "saved", "message": "Settings updated successfully"})

@@ -21,8 +21,23 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/static/css/theme.css" />
   <style>
-  </style>
-</head>
+    .terminal-section { background: #0a0e1a; border: 1px solid rgba(255,255,255,0.06); border-radius: 14px; overflow: hidden; margin-top: 40px; }
+    .terminal-header { display: flex; align-items: center; gap: 8px; padding: 12px 16px; background: rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .terminal-dot.red { background: #ef4444; }
+    .terminal-dot.yellow { background: #eab308; }
+    .terminal-dot.green { background: #22c55e; }
+    .terminal-title { font-size: 0.75rem; color: #64748b; margin-left: 8px; font-family: 'JetBrains Mono', monospace; }
+    .terminal-body { padding: 20px 24px; font-family: 'JetBrains Mono', monospace; font-size: 0.8125rem; line-height: 1.7; min-height: 240px; color: #a8b5d1; }
+    .terminal-prompt { color: #22c55e; }
+    .terminal-cmd { color: #e2e8f0; }
+    .terminal-output { color: #94a3b8; }
+    .terminal-success { color: #22c55e; }
+    .terminal-warn { color: #eab308; }
+    .cursor-blink { animation: blink 1s step-end infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+    .terminal-cta { text-align: center; padding: 0 24px 24px; }
+
 <body>
   <nav class="nav">
     <div class="nav-inner">
@@ -196,6 +211,28 @@
             <span class="code-comment"># Dashboard</span>
             https://automend.vercel.app
           </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-dark" id="live-demo">
+    <div class="section-inner">
+      <div class="section-label">Live Demo</div>
+      <h2 class="section-title">See the agent<br/>in action</h2>
+      <p class="section-desc">Watch AutoMend detect issues, rotate logs, and clean up disk — automatically.</p>
+      <div class="terminal-section">
+        <div class="terminal-header">
+          <span class="terminal-dot red"></span>
+          <span class="terminal-dot yellow"></span>
+          <span class="terminal-dot green"></span>
+          <span class="terminal-title">agent — AutoMend v1</span>
+        </div>
+        <div class="terminal-body" id="terminal-body">
+          <div><span class="terminal-prompt">$</span> <span class="terminal-cmd">automend start</span></div>
+          <div class="terminal-output">[INFO] Agent booting — 5 modules loaded</div>
+          <div class="terminal-output">[INFO] Monitoring every 30s — thresholds: CPU 70/90, MEM 75/95, DISK 80/95</div>
+          <div class="terminal-output" id="term-line"></div>
         </div>
       </div>
     </div>
@@ -601,6 +638,46 @@ python3 dashboard/app.py</div>
 
 
   <script>
+    function runTerminal() {
+      const lines = [
+        { delay: 800, text: '[INFO] System baseline: CPU=12% MEM=43% DISK=67%' },
+        { delay: 1200, text: '[INFO] Log directory: /var/log/app — 28 files, 1.2GB' },
+        { delay: 1000, text: '[WARN] Disk threshold: 80% — initiating cleanup', cls: 'terminal-warn' },
+        { delay: 900, text: '' },
+        { delay: 400, text: '[ACTION] Rotating logs older than 7 days...' },
+        { delay: 1500, text: '[OK] Log rotation complete — freed 412MB', cls: 'terminal-success' },
+        { delay: 800, text: '[ACTION] Scanning temp directory for stale files...' },
+        { delay: 1200, text: '[OK] Cleaned 89 temp files — freed 234MB', cls: 'terminal-success' },
+        { delay: 600, text: '' },
+        { delay: 500, text: '[INFO] Post-cleanup: DISK=61% (↓19%)' },
+        { delay: 900, text: '[ACTION] Running diagnostic engine...' },
+        { delay: 1000, text: '[OK] All services healthy — no further action needed', cls: 'terminal-success' },
+        { delay: 400, text: '' },
+        { delay: 600, text: '[INFO] Next scheduled check in 30s. Agent is idle.' },
+        { delay: 300, text: '' },
+      ];
+      const el = document.getElementById('term-line');
+      let i = 0;
+      function next() {
+        if (i >= lines.length) return;
+        const l = lines[i++];
+        setTimeout(() => {
+          if (l.text === '') {
+            el.innerHTML = el.innerHTML + '<br>';
+          } else {
+            el.innerHTML = el.innerHTML + '<div class="' + (l.cls || 'terminal-output') + '">' + l.text + '</div>';
+          }
+          el.scrollIntoView({ behavior: 'smooth', block: 'end' });
+          next();
+        }, l.delay);
+      }
+      next();
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      const term = document.getElementById('terminal-body');
+      if (term) runTerminal();
+    });
+
     async function loadHeroStats() {
       try {
         const res = await fetch('/api/overview');

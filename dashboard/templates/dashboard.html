@@ -414,6 +414,10 @@
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           Agents
         </a>
+        <a href="#" data-page="maintenance">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          Maintenance
+        </a>
         <a href="#" data-page="activity">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
           Activity
@@ -511,6 +515,51 @@
               <div class="card-badge" id="crew-status-badge">Operational</div>
             </div>
             <div class="card-body" id="agent-crew-stats" style="display:flex;gap:24px;flex-wrap:wrap;"></div>
+          </div>
+        </div>
+
+        <div id="page-maintenance" style="display:none;">
+          <div class="grid-2" style="margin-bottom:16px;">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Disk Cleanup</div>
+                <div class="card-badge" id="disk-status">Checking...</div>
+              </div>
+              <div class="card-body" style="text-align:center;padding:32px;">
+                <div style="font-size:2.5rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:#f1f5f9;" id="disk-before">--</div>
+                <div style="font-size:0.8rem;color:#64748b;margin-top:4px;">Before</div>
+                <div style="font-size:1.5rem;font-weight:700;color:#22c55e;font-family:'JetBrains Mono',monospace;margin-top:16px;" id="disk-after">--</div>
+                <div style="font-size:0.8rem;color:#64748b;margin-top:4px;">After Cleanup</div>
+                <div style="margin-top:16px;font-size:0.85rem;color:#64748b;" id="disk-freed"></div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">Log Rotation</div>
+                <div class="card-badge" id="log-status">Checking...</div>
+              </div>
+              <div class="card-body" style="text-align:center;padding:32px;">
+                <div style="font-size:2.5rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:#f1f5f9;" id="log-before">--</div>
+                <div style="font-size:0.8rem;color:#64748b;margin-top:4px;">Logs Before (files)</div>
+                <div style="font-size:1.5rem;font-weight:700;color:#22c55e;font-family:'JetBrains Mono',monospace;margin-top:16px;" id="log-after">--</div>
+                <div style="font-size:0.8rem;color:#64748b;margin-top:4px;">After Rotation</div>
+                <div style="margin-top:16px;font-size:0.85rem;color:#64748b;" id="log-freed"></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Recent Actions & Rollback</div>
+              <div class="card-badge" id="action-count">0</div>
+            </div>
+            <div class="card-body" style="padding:0;">
+              <table class="task-table">
+                <thead><tr><th>Action</th><th>Result</th><th>Time</th><th></th></tr></thead>
+                <tbody id="action-body" style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;">
+                  <tr><td colspan="4" style="text-align:center;padding:20px;color:hsl(var(--muted-foreground));">Loading...</td></tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
 
@@ -689,7 +738,52 @@
           `<div><div style="font-size:1.25rem;font-weight:700;font-family:'JetBrains Mono',monospace;">${data.total_tasks_completed}</div><div style="font-size:0.75rem;color:hsl(var(--muted-foreground));">Total Tasks</div></div>` +
           `<div><div style="font-size:1.25rem;font-weight:700;font-family:'JetBrains Mono',monospace;">${data.average_success_rate}%</div><div style="font-size:0.75rem;color:hsl(var(--muted-foreground));">Avg Success</div></div>` +
           `<div><div style="font-size:1.25rem;font-weight:700;font-family:'JetBrains Mono',monospace;">${data.agents.length}</div><div style="font-size:0.75rem;color:hsl(var(--muted-foreground));">Active Agents</div></div>`;
-      } catch(e) { document.getElementById('agents-container').innerHTML = '<div style="grid-column:1/-1;text-align:center;color:hsl(var(--muted-foreground));padding:40px;">Failed to load agents</div>'; }
+      } catch(e) { document.getElementById('agents-container').innerHTML = '<div style="grid-column:1/-1;text-align:center;color:hsl(var(--muted-foreground));padding:40px;">Failed to load agents</div>';       }
+    }
+
+    async function loadMaintenance() {
+      try {
+        let actions = [];
+        try { actions = await fetch('/api/actions').then(r=>r.json()); } catch(e) {}
+        const lastRotate = actions.filter(a => a.name === 'Log Rotation')[0];
+        const lastClean = actions.filter(a => a.name === 'Disk Cleanup')[0];
+        const totalFreed = actions.reduce((s, a) => {
+          const m = a.result && a.result.match(/freed\s+(\d+(?:\.\d+)?)\s*(MB|GB)/i);
+          return s + (m ? (m[2].toUpperCase() === 'GB' ? parseFloat(m[1]) * 1024 : parseFloat(m[1])) : 0);
+        }, 0);
+
+        document.getElementById('disk-before').textContent = '--';
+        document.getElementById('disk-after').textContent = '--';
+        document.getElementById('disk-freed').textContent = '';
+        document.getElementById('log-before').textContent = '--';
+        document.getElementById('log-after').textContent = '--';
+        document.getElementById('log-freed').textContent = '';
+
+        if (lastClean) {
+          const m = lastClean.result && lastClean.result.match(/Cleaned\s+(\d+)\s+.*?freed\s+(\d+)\s*(MB|GB)/i);
+          if (m) {
+            document.getElementById('disk-before').textContent = m[1] + ' files';
+            document.getElementById('disk-after').textContent = '0 files';
+            document.getElementById('disk-freed').textContent = 'Freed ' + m[2] + m[3];
+          }
+        }
+        if (lastRotate) {
+          const m = lastRotate.result && lastRotate.result.match(/Rotated\s+(\d+)\s+.*?freed\s+(\d+)\s*(MB|GB)/i);
+          if (m) {
+            document.getElementById('log-before').textContent = m[1];
+            document.getElementById('log-after').textContent = '0';
+            document.getElementById('log-freed').textContent = 'Freed ' + m[2] + m[3];
+          }
+        }
+
+        document.getElementById('disk-status').textContent = 'Active';
+        document.getElementById('log-status').textContent = 'Active';
+
+        document.getElementById('action-body').innerHTML = (actions.length ? actions : []).slice(0, 10).map(a =>
+          `<tr><td>${a.name}</td><td><span class="status-badge ${a.status}">${a.status}</span></td><td style="color:${a.status === 'completed' ? '#22c55e' : '#ef4444'}">${a.result || '—'}</td><td>${a.timestamp ? ago(a.timestamp) : '—'}</td></tr>`
+        ).join('');
+        document.getElementById('action-count').textContent = actions.length;
+      } catch(e) { document.getElementById('action-body').innerHTML = '<tr><td colspan="4" style="text-align:center;color:hsl(var(--muted-foreground));">No data</td></tr>'; }
     }
 
     document.querySelectorAll('.sidebar-nav a[data-page]').forEach(a => {
@@ -699,7 +793,7 @@
         a.classList.add('active');
         document.querySelectorAll('.main-content > div[id^="page-"]').forEach(d => d.style.display = 'none');
         document.getElementById('page-' + a.dataset.page).style.display = 'block';
-        const titles = { overview: ['Dashboard', 'Real-time system overview'], services: ['Services', 'Service health and latency monitoring'], agents: ['Agents', 'AI agent runtime and performance'], activity: ['Activity', 'Live event timeline'] };
+        const titles = { overview: ['Dashboard', 'Real-time system overview'], services: ['Services', 'Service health and latency monitoring'], agents: ['Agents', 'AI agent runtime and performance'], maintenance: ['Maintenance', 'Log rotation & disk cleanup'], activity: ['Activity', 'Live event timeline'] };
         document.getElementById('page-title').textContent = titles[a.dataset.page][0];
         document.getElementById('page-subtitle').textContent = titles[a.dataset.page][1];
       });
@@ -707,7 +801,7 @@
 
     async function refreshAll() {
       const start = performance.now();
-      await Promise.all([loadOverview(), loadChart(), loadAlerts(), loadTasks(), loadServices(), loadAgents(), loadActivity()]);
+      await Promise.all([loadOverview(), loadChart(), loadAlerts(), loadTasks(), loadServices(), loadAgents(), loadActivity(), loadMaintenance()]);
       document.getElementById('refresh-time').textContent = (performance.now() - start).toFixed(0) + 'ms';
     }
     refreshAll();

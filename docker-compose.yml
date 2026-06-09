@@ -1,19 +1,12 @@
 version: "3.9"
 
 services:
-  agent:
-    build:
-      context: .
-      target: agent
-    env_file: .env
-    restart: unless-stopped
-    network_mode: host
-
-  dashboard:
-    build:
-      context: .
-      target: dashboard
+  automend:
+    build: .
     ports:
       - "8080:8080"
+      - "9090:9090"
     env_file: .env
     restart: unless-stopped
+    environment:
+      - AGENT_URL=http://localhost:9090
