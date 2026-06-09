@@ -9,6 +9,7 @@ const MaintenanceAgent = require('./src/agent/MaintenanceAgent');
 const SystemMonitor = require('./src/monitor/SystemMonitor');
 const DiagnosticEngine = require('./src/diagnostic/DiagnosticEngine');
 const ConfigManager = require('./src/config/ConfigManager');
+const AgentServer = require('./src/server/AgentServer');
 const Logger = require('./src/utils/Logger');
 
 // Sentry — error tracking (optional, requires SENTRY_DSN env)
@@ -49,6 +50,11 @@ async function bootstrap() {
 
     logger.info('✨ Automatic Maintenance Agent is running');
     logger.info(`🔄 Monitoring interval: ${config.monitoringInterval}ms`);
+
+    // Start API server for dashboard to consume real metrics
+    const apiServer = new AgentServer(agent);
+    apiServer.start();
+    logger.info(`🔌 Agent API server started on port ${apiServer.port}`);
     
   } catch (error) {
     logger.error('❌ Failed to start Automatic Maintenance Agent', error);

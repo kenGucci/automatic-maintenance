@@ -54,9 +54,7 @@
         <a href="#how-it-works">How It Works</a>
           <a href="#architecture">Architecture</a>
           <a href="#agents">Agents</a>
-        <a href="#testimonials">Testimonials</a>
         <a href="#faq">FAQ</a>
-        <a href="/dashboard">Dashboard</a>
         <a href="/dashboard">Dashboard</a>
       </div>
       <div class="nav-actions">
@@ -73,7 +71,7 @@
   <section class="hero">
     <div class="hero-bg"></div>
     <div class="hero-content">
-      <div class="hero-badge">AI-Powered Infrastructure</div>
+      <div class="hero-badge" id="mode-badge">AI-Powered Infrastructure</div>
       <h1 class="hero-title">
         Your systems run<br/>
         <span class="gradient-text">themselves</span>
@@ -448,74 +446,9 @@ python3 dashboard/app.py</div>
 
 
 
-  <section class="section section-dark" id="stats">
-    <div class="section-inner">
-      <div class="section-label">By the Numbers</div>
-      <h2 class="section-title">Trusted by developers<br/>who value uptime</h2>
-      <p class="section-desc">AutoMend is growing — here's the momentum so far.</p>
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-value" data-count="1287">0</div>
-          <div class="stat-label">GitHub Stars</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" data-count="342">0</div>
-          <div class="stat-label">Forks</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" data-count="56">0</div>
-          <div class="stat-label">Contributors</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value" data-count="99.7">0<span class="stat-unit">%</span></div>
-          <div class="stat-label">Avg. Uptime</div>
-        </div>
-      </div>
-    </div>
-  </section>
 
-  <section class="section" id="testimonials">
-    <div class="section-inner">
-      <div class="section-label">Testimonials</div>
-      <h2 class="section-title">What the community<br/>is saying</h2>
-      <p class="section-desc">Early adopters are already seeing the difference.</p>
-      <div class="testimonial-grid">
-        <div class="testimonial-card">
-          <div class="testimonial-stars">★★★★★</div>
-          <p class="testimonial-text">"AutoMend caught a disk spike at 3 AM and resolved it before I even woke up. That's never happened before."</p>
-          <div class="testimonial-author">
-            <div class="testimonial-avatar" style="background:rgba(129,140,248,0.15);color:#818cf8;">S</div>
-            <div>
-              <div class="testimonial-name">Sarah Chen</div>
-              <div class="testimonial-role">DevOps Engineer</div>
-            </div>
-          </div>
-        </div>
-        <div class="testimonial-card">
-          <div class="testimonial-stars">★★★★★</div>
-          <p class="testimonial-text">"Set it up in 10 minutes. The dashboard gives me a birds-eye view of all my servers. Finally, infrastructure that takes care of itself."</p>
-          <div class="testimonial-author">
-            <div class="testimonial-avatar" style="background:rgba(16,185,129,0.15);color:#10b981;">M</div>
-            <div>
-              <div class="testimonial-name">Marcus Rivera</div>
-              <div class="testimonial-role">Full-Stack Developer</div>
-            </div>
-          </div>
-        </div>
-        <div class="testimonial-card">
-          <div class="testimonial-stars">★★★★★</div>
-          <p class="testimonial-text">"The safety boundaries convinced me to try it. I started in read-only mode, then gradually turned on auto-remediation. Now I can't imagine running servers without it."</p>
-          <div class="testimonial-author">
-            <div class="testimonial-avatar" style="background:rgba(245,158,11,0.15);color:#fbbf24;">A</div>
-            <div>
-              <div class="testimonial-name">Aisha Patel</div>
-              <div class="testimonial-role">Platform Engineer</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
+
+
 
   <section class="section section-dark" id="faq">
     <div class="section-inner">
@@ -625,7 +558,6 @@ python3 dashboard/app.py</div>
           <a href="#features">Features</a>
         <a href="#architecture">Architecture</a>
           <a href="#agents">Agents</a>
-          <a href="#testimonials">Testimonials</a>
           <a href="#faq">FAQ</a>
           <a href="/dashboard">Dashboard</a>
         </div>
@@ -671,15 +603,29 @@ python3 dashboard/app.py</div>
   <script>
     async function loadHeroStats() {
       try {
-        const res = await fetch('/api/overview');
-        const data = await res.json();
+        const [modeRes, statsRes] = await Promise.all([
+          fetch('/api/mode'),
+          fetch('/api/overview')
+        ]);
+        const mode = await modeRes.json();
+        const data = await statsRes.json();
         document.getElementById('hero-health').textContent = data.system_health_score + '%';
         document.getElementById('hero-tasks').textContent = data.tasks_completed_today;
         document.getElementById('hero-uptime').textContent = data.uptime;
+        const badge = document.getElementById('mode-badge');
+        if (mode.mode === 'demo') {
+          badge.textContent = 'Demo — Simulated Data';
+          badge.style.background = 'rgba(245,158,11,0.15)';
+          badge.style.color = '#fbbf24';
+        } else {
+          badge.textContent = 'Live — Connected to Agent';
+          badge.style.background = 'rgba(34,197,94,0.15)';
+          badge.style.color = '#22c55e';
+        }
       } catch(e) {
-        document.getElementById('hero-health').textContent = '99.2%';
-        document.getElementById('hero-tasks').textContent = '12';
-        document.getElementById('hero-uptime').textContent = '72h 15m';
+        document.getElementById('hero-health').textContent = '--';
+        document.getElementById('hero-tasks').textContent = '--';
+        document.getElementById('hero-uptime').textContent = '--';
       }
     }
     loadHeroStats();
@@ -695,35 +641,7 @@ python3 dashboard/app.py</div>
       el.parentElement.classList.toggle('open');
     }
 
-    function animateCounters() {
-      const counters = document.querySelectorAll('.stat-value[data-count]');
-      counters.forEach(counter => {
-        const target = parseFloat(counter.dataset.count);
-        const duration = 1500;
-        const start = performance.now();
-        function update(now) {
-          const elapsed = now - start;
-          const progress = Math.min(elapsed / duration, 1);
-          const eased = 1 - Math.pow(1 - progress, 3);
-          const current = Math.round(target * eased);
-          if (target === Math.round(target)) {
-            counter.textContent = current;
-          } else {
-            counter.innerHTML = current + '<span class="stat-unit">%</span>';
-          }
-          if (progress < 1) requestAnimationFrame(update);
-        }
-        requestAnimationFrame(update);
-      });
-    }
 
-    const statsObserver = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) { animateCounters(); statsObserver.disconnect(); }
-      });
-    }, { threshold: 0.3 });
-    const statsSection = document.getElementById('stats');
-    if (statsSection) statsObserver.observe(statsSection);
   </script>
 </body>
 </html>

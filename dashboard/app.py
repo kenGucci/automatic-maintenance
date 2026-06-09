@@ -1,8 +1,10 @@
 """Automatic Maintenance Dashboard - Flask Server"""
 
-import os, time, hashlib, math
+import os, time, hashlib, math, json
 from flask import Flask, render_template, jsonify, request
 from datetime import datetime, timedelta
+from urllib.request import urlopen, Request
+from urllib.error import URLError
 
 # Sentry — error tracking (optional, requires SENTRY_DSN env)
 _sentry_dsn = os.environ.get('SENTRY_DSN')
@@ -20,6 +22,22 @@ app = Flask(__name__,
     static_url_path='/static')
 
 BUCKET_SECONDS = 300  # 5min windows so data stays stable between refreshes
+
+AGENT_URL = os.environ.get('AGENT_URL', 'http://localhost:9090')
+
+def _try_agent(path, timeout=2):
+    """Fetch data from the live Node.js agent. Returns None if unavailable."""
+    try:
+        req = Request(f'{AGENT_URL}{path}', headers={'User-Agent': 'AutoMend-Dashboard'})
+        with urlopen(req, timeout=timeout) as resp:
+            return json.loads(resp.read().decode())
+    except (URLError, ConnectionRefusedError, OSError, json.JSONDecodeError):
+        return None
+
+def _is_live():
+    """Check if the Node.js agent is running and serving real data."""
+    data = _try_agent('/api/health')
+    return data is not None and data.get('source') == 'live'
 
 SEED_AGENTS = [
     {"id": "agent-1", "name": "Production-Web-01", "type": "server", "role": "Web Server", "base_health": 92, "base_tasks": 187, "base_success": 96},
@@ -176,12 +194,24 @@ def index():
 def dashboard():
     return render_template("dashboard.html")
 
+@app.route("/api/mode")
+def api_mode():
+    return jsonify({"mode": "live" if _is_live() else "demo"})
+
 @app.route("/api/overview")
 def api_overview():
+    data = _try_agent('/api/overview')
+    if data:
+        data.pop('source', None)
+        return jsonify(data)
     return jsonify(_generate_overview(_bucket()))
 
 @app.route("/api/metrics")
 def api_metrics():
+    data = _try_agent('/api/metrics')
+    if data:
+        data.pop('source', None)
+        return jsonify(data)
     return jsonify(_generate_metrics(_bucket()))
 
 @app.route("/api/metrics/history")
@@ -190,6 +220,11 @@ def api_metrics_history():
 
 @app.route("/api/alerts")
 def api_alerts():
+    data = _try_agent('/api/alerts')
+    if data:
+        for a in data:
+            a.pop('source', None)
+        return jsonify(data)
     return jsonify(_generate_alerts(_bucket()))
 
 @app.route("/api/tasks")
@@ -198,6 +233,10 @@ def api_tasks():
 
 @app.route("/api/diagnostics")
 def api_diagnostics():
+    data = _try_agent('/api/diagnostics')
+    if data:
+        data.pop('source', None)
+        return jsonify(data)
     return jsonify(_generate_diagnostics(_bucket()))
 
 @app.route("/api/settings")

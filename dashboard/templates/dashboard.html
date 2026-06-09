@@ -548,12 +548,25 @@
 
     async function loadOverview() {
       try {
-        const [ov, met] = await Promise.all([ fetch(API.overview).then(r=>r.json()), fetch(API.metrics).then(r=>r.json()) ]);
+        const [modeRes, ovRes, metRes] = await Promise.all([ fetch('/api/mode'), fetch(API.overview), fetch(API.metrics) ]);
+        const mode = await modeRes.json();
+        const ov = await ovRes.json();
+        const met = await metRes.json();
         document.getElementById('kpi-row').innerHTML =
           kpi('Health Score', ov.system_health_score + '%', {cls:'green', text:'System ' + ov.agent_status}) +
           kpi('Uptime', ov.uptime, {cls:'green', text: 'Last check ' + ago(ov.last_check)}) +
           kpi('CPU', met.cpu_usage + '%', {cls: met.cpu_usage > 80 ? 'red' : met.cpu_usage > 60 ? 'yellow' : 'green', text: met.cpu_usage > 70 ? 'High' : met.cpu_usage > 30 ? 'Moderate' : 'Normal'}) +
           kpi('Memory', met.memory_usage + '%', {cls: met.memory_usage > 85 ? 'red' : met.memory_usage > 65 ? 'yellow' : 'green', text: met.memory_usage > 75 ? 'High' : met.memory_usage > 40 ? 'Moderate' : 'Normal'});
+        const statusEl = document.getElementById('live-status');
+        if (mode.mode === 'demo') {
+          statusEl.textContent = 'Demo';
+          statusEl.style.background = 'rgba(245,158,11,0.15)';
+          statusEl.style.color = '#fbbf24';
+        } else {
+          statusEl.textContent = 'Live';
+          statusEl.style.background = 'rgba(34,197,94,0.15)';
+          statusEl.style.color = '#22c55e';
+        }
       } catch(e) { document.getElementById('kpi-row').innerHTML = '<div class="kpi" style="grid-column:1/-1;text-align:center;color:hsl(var(--muted-foreground));padding:40px;">Failed to load metrics</div>'; }
     }
 
