@@ -4,6 +4,12 @@ from datetime import datetime
 from urllib.parse import urlparse
 
 try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass
+
+try:
     import psutil
 except ImportError:
     psutil = None
@@ -160,7 +166,7 @@ class DiagnosticEngine:
 
         results = {
             'timestamp': datetime.utcnow().isoformat(),
-            'overall_status': 'operational',
+            'overall_status': self._determine_overall_status(services, alerts),
             'services': services,
             'recommendations': recs,
         }
@@ -186,6 +192,17 @@ class DiagnosticEngine:
                 sock.close()
             results.append({'name': name, 'status': status, 'latency_ms': latency})
         return results
+
+    def _determine_overall_status(self, services, alerts):
+        critical_alerts = [a for a in alerts if a['type'] == 'critical']
+        degraded_services = [s for s in services if s['status'] in ('degraded', 'warning')]
+        unreachable_services = [s for s in services if s['status'] == 'unreachable']
+
+        if critical_alerts or unreachable_services:
+            return 'critical'
+        if degraded_services:
+            return 'degraded'
+        return 'operational'
 
     def _recommendations(self, metrics, alerts):
         recs = []

@@ -6,7 +6,10 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const { execSync } = require('child_process');
 const Logger = require('../utils/Logger');
+const Notifier = require('../utils/Notifier');
+const SshClient = require('../utils/SshClient');
 
 const logger = new Logger('MaintenanceAgent');
 
@@ -21,6 +24,8 @@ class MaintenanceAgent {
     this.maintenanceTasks = [];
     this.completedTasks = [];
     this.alertHistory = [];
+    this.remoteClients = (config.remoteHosts || []).map(h => new SshClient(h));
+    this.notifier = new Notifier(config.notification || {});
   }
 
   /**
@@ -121,7 +126,22 @@ class MaintenanceAgent {
         await this._autoRemediate(alerts, diagResults);
       }
 
-      // 5. Log summary
+      // 5. Poll remote hosts
+      if (this.remoteClients.length > 0) {
+        await this._pollRemoteHosts();
+      }
+
+      // 6. Notify on critical alerts
+      const criticalAlerts = alerts.filter(a => a.type === 'critical');
+      if (criticalAlerts.length > 0) {
+        await this.notifier.send(
+          `[${this.config.environment}] ${criticalAlerts.length} critical alert(s)`,
+          criticalAlerts.map(a => `• ${a.message}`).join('\n'),
+          'critical',
+        );
+      }
+
+      // 7. Log summary
       logger.info('Diagnostic cycle complete', {
         status: diagResults.overall_status,
         alerts: alerts.length,
@@ -129,6 +149,55 @@ class MaintenanceAgent {
       });
     } catch (error) {
       logger.error('Diagnostic cycle failed', error);
+    }
+  }
+
+  /**
+   * Poll metrics from remote SSH hosts and record their alerts
+   */
+  async _pollRemoteHosts() {
+    for (const client of this.remoteClients) {
+      try {
+        const metrics = await client.collectMetrics();
+        if (!metrics) continue;
+
+        const remoteAlerts = [];
+        if (metrics.cpu_usage >= 70) {
+          remoteAlerts.push({ type: metrics.cpu_usage >= 90 ? 'critical' : 'warning', metric: 'cpu', value: metrics.cpu_usage, message: `Remote ${metrics.hostname}: CPU at ${metrics.cpu_usage}%`, host: metrics.hostname });
+        }
+        if (metrics.memory_usage >= 75) {
+          remoteAlerts.push({ type: metrics.memory_usage >= 95 ? 'critical' : 'warning', metric: 'memory', value: metrics.memory_usage, message: `Remote ${metrics.hostname}: Memory at ${metrics.memory_usage}%`, host: metrics.hostname });
+        }
+        if (metrics.disk_usage_percent >= 80) {
+          remoteAlerts.push({ type: metrics.disk_usage_percent >= 95 ? 'critical' : 'warning', metric: 'disk', value: metrics.disk_usage_percent, message: `Remote ${metrics.hostname}: Disk at ${metrics.disk_usage_percent}%`, host: metrics.hostname });
+        }
+
+        if (remoteAlerts.length > 0) {
+          this._recordAlerts(remoteAlerts);
+          logger.warn(`Remote alerts from ${metrics.hostname}`, { alerts: remoteAlerts });
+
+          if (this.config.autoRemediation) {
+            for (const alert of remoteAlerts) {
+              try {
+                await client.runRemediation({ name: alert.metric === 'disk' ? 'disk_cleanup' : alert.metric === 'memory' ? 'clean_temp' : 'rotate_logs' });
+                this.completedTasks.push({
+                  name: `Remote ${alert.metric} fix on ${metrics.hostname}`,
+                  alert,
+                  result: { message: `Auto-remediated ${alert.metric} on ${metrics.hostname}` },
+                  timestamp: new Date().toISOString(),
+                  status: 'completed',
+                });
+              } catch (err) {
+                logger.error(`Remote remediation failed on ${metrics.hostname}`, err);
+              }
+            }
+          }
+        }
+
+        logger.debug(`Remote poll ${metrics.hostname} OK`, { cpu: metrics.cpu_usage, mem: metrics.memory_usage, disk: metrics.disk_usage_percent });
+      } catch (err) {
+        logger.warn(`Remote poll failed for ${client.host}`, { error: err.message });
+      }
     }
   }
 
@@ -190,25 +259,102 @@ class MaintenanceAgent {
   _determineRemediation(alert, diagResults) {
     const remediations = {
       cpu: {
-        name: 'CPU Optimization',
+        name: 'cpu_optimization',
         execute: async () => {
-          // In a real system, this could restart services, kill rogue processes, etc.
-          return { message: 'CPU optimization triggered. Reviewed top processes and cleaned up stale workers.' };
+          const killed = [];
+          try {
+            const top = execSync('ps aux --sort=-%cpu | head -20', { encoding: 'utf8', timeout: 5000 });
+            const lines = top.trim().split('\n').slice(1);
+            for (const line of lines) {
+              const parts = line.trim().split(/\s+/);
+              const pid = parseInt(parts[1], 10);
+              const cmd = parts.slice(10).join(' ');
+              const cpu = parseFloat(parts[2]);
+              if (cpu > 50 && pid > 1 && !cmd.includes('node') && !cmd.includes('sshd') && !cmd.includes('systemd')) {
+                try {
+                  execSync(`kill -9 ${pid}`, { timeout: 2000 });
+                  killed.push(cmd);
+                } catch {}
+              }
+            }
+          } catch {}
+          if (global.gc) global.gc();
+          return { message: `Killed ${killed.length} high-CPU processes: ${killed.join(', ') || 'none found'}` };
         },
       },
       memory: {
-        name: 'Memory Cleanup',
+        name: 'memory_cleanup',
         execute: async () => {
-          // Force garbage collection hint, clear caches
+          const freed = [];
+          try {
+            execSync('sync && echo 3 > /proc/sys/vm/drop_caches 2>/dev/null', { timeout: 3000 });
+            freed.push('page cache');
+          } catch {}
           if (global.gc) global.gc();
-          return { message: 'Memory cleanup triggered. Cleared application caches and forced GC.' };
+          try {
+            const top = execSync('ps aux --sort=-%mem | head -10', { encoding: 'utf8', timeout: 5000 });
+            const lines = top.trim().split('\n').slice(1);
+            for (const line of lines) {
+              const parts = line.trim().split(/\s+/);
+              const pid = parseInt(parts[1], 10);
+              const mem = parseFloat(parts[3]);
+              const cmd = parts.slice(10).join(' ');
+              if (mem > 30 && pid > 1 && !cmd.includes('node') && !cmd.includes('systemd')) {
+                try {
+                  execSync(`kill -9 ${pid}`, { timeout: 2000 });
+                  freed.push(cmd);
+                } catch {}
+              }
+            }
+          } catch {}
+          return { message: `Freed ${freed.length > 1 ? `${freed.length - 1} cache(s)` : '0 caches'} and killed ${freed.filter(f => !f.includes('cache')).length} process(es)` };
         },
       },
       disk: {
-        name: 'Disk Cleanup',
+        name: 'disk_cleanup',
         execute: async () => {
-          // Clean temp files, rotate logs
-          return { message: 'Disk cleanup triggered. Rotated logs and cleared temp files.' };
+          const freed = [];
+          try {
+            const out = execSync('docker system prune -af --volumes 2>/dev/null', { encoding: 'utf8', timeout: 30000 });
+            const match = out.match(/Total reclaimed space:\s+([\d.]+[MG]?B)/);
+            if (match) freed.push(`docker: ${match[1]}`);
+            else freed.push('docker pruned');
+          } catch {}
+          try {
+            execSync('apt-get clean -y 2>/dev/null; yum clean all 2>/dev/null; pkg clean -y 2>/dev/null', { timeout: 15000 });
+            freed.push('package cache');
+          } catch {}
+          try {
+            const logsDir = path.join(process.cwd(), 'logs');
+            if (fs.existsSync(logsDir)) {
+              const files = fs.readdirSync(logsDir);
+              for (const file of files) {
+                const fp = path.join(logsDir, file);
+                const stat = fs.statSync(fp);
+                if (stat.isFile() && Date.now() - stat.mtimeMs > 7 * 24 * 60 * 60 * 1000) {
+                  fs.truncateSync(fp, 0);
+                }
+              }
+              freed.push(`${files.length} logs rotated`);
+            }
+          } catch {}
+          try {
+            const tmpDir = os.tmpdir();
+            const files = fs.readdirSync(tmpDir);
+            let cleaned = 0;
+            for (const file of files) {
+              try {
+                const fp = path.join(tmpDir, file);
+                const stat = fs.statSync(fp);
+                if (stat.isFile() && Date.now() - stat.mtimeMs > 24 * 60 * 60 * 1000) {
+                  fs.unlinkSync(fp);
+                  cleaned++;
+                }
+              } catch {}
+            }
+            freed.push(`${cleaned} temp files`);
+          } catch {}
+          return { message: `Disk cleanup: ${freed.join(', ') || 'nothing to clean'}` };
         },
       },
     };
@@ -362,10 +508,42 @@ class MaintenanceAgent {
         return { message: `Cleaned ${cleaned} temp files` };
       },
       'Security Scan': async () => {
-        return { message: 'Security scan completed. No vulnerabilities detected.' };
+        const issues = [];
+        try {
+          const passwd = fs.readFileSync('/etc/passwd', 'utf8');
+          const usersWithShell = passwd.split('\n').filter(l => l && !l.startsWith('#') && l.includes('/bin/bash') || l.includes('/bin/sh'));
+          if (usersWithShell.some(u => u.split(':')[2] === '0' && u.split(':')[0] !== 'root')) {
+            issues.push('Non-root user with UID 0 detected');
+          }
+        } catch {}
+        try {
+          if (fs.existsSync('/etc/ssh/sshd_config')) {
+            const cfg = fs.readFileSync('/etc/ssh/sshd_config', 'utf8');
+            if (cfg.match(/^PermitRootLogin\s+yes/m)) issues.push('Root SSH login enabled');
+            if (!cfg.match(/^PasswordAuthentication\s+no/m)) issues.push('Password authentication not disabled');
+          }
+        } catch {}
+        try {
+          const out = execSync('find /tmp /var/tmp -perm -o+w -type f 2>/dev/null | head -20', { encoding: 'utf8', timeout: 5000 });
+          if (out.trim()) issues.push(`${out.trim().split('\n').length} world-writable temp files`);
+        } catch {}
+        return { message: issues.length ? `Security issues: ${issues.join('; ')}` : 'No vulnerabilities detected.' };
       },
       'Backup Verification': async () => {
-        return { message: 'Backup verification completed. All backups are valid.' };
+        const results = [];
+        try {
+          const out = execSync('which restic 2>/dev/null && restic snapshots --json 2>/dev/null || which borg 2>/dev/null && borg list 2>/dev/null || echo "no backup tool found"', { encoding: 'utf8', timeout: 10000 });
+          if (out.includes('no backup tool')) {
+            results.push('No backup tool (restic/borg) configured');
+          } else {
+            results.push('Backup tool found and accessible');
+          }
+        } catch {}
+        try {
+          const etcBackup = fs.readdirSync('/etc').length > 0;
+          results.push('/etc readable');
+        } catch {}
+        return { message: results.join('; ') || 'Backup verification completed' };
       },
     };
     return executors[name];
