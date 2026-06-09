@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "node --test src/test/*.test.js",
+    "test:py": "python3 -m unittest discover -s tests -v",
     "start": "python3 agent.py",
     "start:node": "node index.js",
     "dev": "nodemon index.js",

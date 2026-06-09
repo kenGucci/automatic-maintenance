@@ -5,6 +5,7 @@
 
 const os = require('os');
 const fs = require('fs');
+const { execSync } = require('child_process');
 const Logger = require('../utils/Logger');
 
 const logger = new Logger('SystemMonitor');
@@ -184,13 +185,30 @@ class SystemMonitor {
 
   _getDiskUsage() {
     try {
-      // Use statfs for disk info (cross-platform fallback)
-      const stats = fs.statfsSync('/');
-      const total = stats.bsize * stats.blocks;
-      const free = stats.bfree * stats.bsize;
-      const used = total - free;
+      if (typeof fs.statfsSync === 'function') {
+        const stats = fs.statfsSync('/');
+        const total = stats.bsize * stats.blocks;
+        const free = stats.bfree * stats.bsize;
+        const used = total - free;
+        const percent = ((used / total) * 100).toFixed(1);
+        return {
+          total_gb: (total / 1024 / 1024 / 1024).toFixed(1),
+          used_gb: (used / 1024 / 1024 / 1024).toFixed(1),
+          free_gb: (free / 1024 / 1024 / 1024).toFixed(1),
+          percent: parseFloat(percent),
+        };
+      }
+      const output = execSync('df -k /', { timeout: 3000, encoding: 'utf8' });
+      const lines = output.trim().split('\n');
+      const parts = lines[1].split(/\s+/);
+      const totalBlocks = parseInt(parts[1], 10);
+      const usedBlocks = parseInt(parts[2], 10);
+      const freeBlocks = parseInt(parts[3], 10);
+      const blockSize = 1;
+      const total = totalBlocks * blockSize * 1024;
+      const used = usedBlocks * blockSize * 1024;
+      const free = freeBlocks * blockSize * 1024;
       const percent = ((used / total) * 100).toFixed(1);
-
       return {
         total_gb: (total / 1024 / 1024 / 1024).toFixed(1),
         used_gb: (used / 1024 / 1024 / 1024).toFixed(1),
