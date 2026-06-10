@@ -418,7 +418,7 @@ def api_agents():
 
 @app.route("/api/bankr/portfolio")
 def api_bankr_portfolio():
-    from bankr_client import get_portfolio, get_wallet_info
+    from dashboard.bankr_client import get_portfolio, get_wallet_info
     portfolio = get_portfolio()
     info = get_wallet_info()
     return jsonify({
@@ -428,7 +428,7 @@ def api_bankr_portfolio():
 
 @app.route("/api/bankr/tokens")
 def api_bankr_tokens():
-    from bankr_client import search_tokens, get_token_info
+    from dashboard.bankr_client import search_tokens, get_token_info
     q = request.args.get("q", "")
     if q:
         return jsonify(search_tokens(q) or {"error": "Bankr API unavailable"})
@@ -436,7 +436,7 @@ def api_bankr_tokens():
 
 @app.route("/api/bankr/credits")
 def api_bankr_credits():
-    from bankr_client import check_credits
+    from dashboard.bankr_client import check_credits
     return jsonify(check_credits() or {"error": "Bankr API unavailable"})
 
 # --- Pro Dashboard Routes ---
