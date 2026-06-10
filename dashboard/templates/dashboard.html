@@ -830,12 +830,19 @@
       try {
         const data = await fetch('/api/bankr/portfolio').then(r => r.json());
         const p = data.portfolio || {};
-        const tokens = p.tokens || p.balances || p.assets || [];
-        const totalUsd = p.total_usd || p.totalValue || 0;
+        const balances = p.balances || {};
+        const chains = Object.keys(balances);
+        const totalUsd = chains.reduce((s, c) => s + parseFloat(balances[c].total || 0), 0);
         const pnl = p.pnl || p.totalPnl || null;
+        const tokens = [];
+        chains.forEach(c => {
+          const b = balances[c];
+          if (parseFloat(b.nativeBalance || 0) > 0) tokens.push({ symbol: 'ETH', chain: c, balance: b.nativeBalance, value_usd: parseFloat(b.nativeUsd || 0) });
+          (b.tokenBalances || []).forEach(t => tokens.push({ symbol: t.symbol || t.token, chain: c, balance: t.balance || t.amount, value_usd: parseFloat(t.value_usd || t.usdValue || 0) }));
+        });
 
         document.getElementById('crypto-total').textContent = tokens.length ? '$' + Number(totalUsd).toLocaleString() : '—';
-        document.getElementById('crypto-total-usd').textContent = tokens.length ? 'Across ' + (p.chains || p.chainCount || '—') + ' chains' : 'Connect Bankr';
+        document.getElementById('crypto-total-usd').textContent = tokens.length ? 'Across ' + chains.length + ' chains' : 'Connect Bankr';
         if (pnl !== null) {
           document.getElementById('crypto-pnl').textContent = (pnl >= 0 ? '+' : '') + '$' + Number(pnl).toLocaleString();
           document.getElementById('crypto-pnl').style.color = pnl >= 0 ? '#22c55e' : '#ef4444';
@@ -843,7 +850,7 @@
         } else {
           document.getElementById('crypto-pnl').textContent = '—';
         }
-        document.getElementById('crypto-chains').textContent = p.chains || p.chainCount || tokens.length ? new Set(tokens.map(t => t.chain).filter(Boolean)).size || '—' : '—';
+        document.getElementById('crypto-chains').textContent = chains.length || '—';
 
         if (tokens.length) {
           document.getElementById('crypto-tokens').textContent = tokens.length;
