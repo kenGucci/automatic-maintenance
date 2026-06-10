@@ -427,6 +427,10 @@
           Pro Dashboard
           <span class="pro-tag">PRO</span>
         </a>
+        <a href="#" data-page="crypto">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          Crypto Treasury
+        </a>
       </nav>
       <div class="sidebar-footer">
         <a href="/">
@@ -573,6 +577,42 @@
               <div class="timeline" id="timeline">
                 <div style="text-align:center;padding:20px;color:hsl(var(--muted-foreground));">Loading...</div>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="page-crypto" style="display:none;">
+          <div class="kpi-row" id="crypto-kpi-row">
+            <div class="kpi"><div class="kpi-label">Total Balance</div><div class="kpi-value" id="crypto-total">--</div><div class="kpi-footer neutral" id="crypto-total-usd">USD value</div></div>
+            <div class="kpi"><div class="kpi-label">PnL</div><div class="kpi-value" id="crypto-pnl">--</div><div class="kpi-footer neutral" id="crypto-pnl-label">Profit / Loss</div></div>
+            <div class="kpi"><div class="kpi-label">Chains</div><div class="kpi-value" id="crypto-chains">--</div><div class="kpi-footer neutral">Active networks</div></div>
+            <div class="kpi"><div class="kpi-label">Tokens</div><div class="kpi-value" id="crypto-tokens">--</div><div class="kpi-footer neutral">Holdings</div></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">Portfolio Breakdown</div>
+              <div class="card-badge">Powered by Bankr</div>
+            </div>
+            <div class="card-body" style="padding:0;">
+              <table class="task-table">
+                <thead><tr><th>Token</th><th>Chain</th><th>Balance</th><th>Value</th></tr></thead>
+                <tbody id="crypto-table" style="font-family:'JetBrains Mono',monospace;font-size:0.75rem;">
+                  <tr><td colspan="4" style="text-align:center;padding:20px;color:hsl(var(--muted-foreground));">Loading portfolio...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card" style="margin-top:16px;">
+            <div class="card-header">
+              <div class="card-title">Token Search</div>
+              <div class="card-badge">Price & info</div>
+            </div>
+            <div class="card-body">
+              <div style="display:flex;gap:8px;margin-bottom:12px;">
+                <input id="crypto-search-input" type="text" placeholder="Search token (e.g. ETH, PEPE, SOL)..." style="flex:1;background:rgba(255,255,255,0.05);border:1px solid hsl(var(--border));border-radius:6px;padding:8px 12px;font-size:0.8125rem;color:hsl(var(--foreground));outline:none;">
+                <button id="crypto-search-btn" style="background:hsl(var(--primary));color:white;border:none;border-radius:6px;padding:8px 16px;font-size:0.8125rem;cursor:pointer;">Search</button>
+              </div>
+              <div id="crypto-search-result" style="font-size:0.8125rem;color:hsl(var(--muted-foreground));">Search for a token to see details.</div>
             </div>
           </div>
         </div>
@@ -786,6 +826,65 @@
       } catch(e) { document.getElementById('action-body').innerHTML = '<tr><td colspan="4" style="text-align:center;color:hsl(var(--muted-foreground));">No data</td></tr>'; }
     }
 
+    async function loadCrypto() {
+      try {
+        const data = await fetch('/api/bankr/portfolio').then(r => r.json());
+        const p = data.portfolio || {};
+        const tokens = p.tokens || p.balances || p.assets || [];
+        const totalUsd = p.total_usd || p.totalValue || 0;
+        const pnl = p.pnl || p.totalPnl || null;
+
+        document.getElementById('crypto-total').textContent = tokens.length ? '$' + Number(totalUsd).toLocaleString() : '—';
+        document.getElementById('crypto-total-usd').textContent = tokens.length ? 'Across ' + (p.chains || p.chainCount || '—') + ' chains' : 'Connect Bankr';
+        if (pnl !== null) {
+          document.getElementById('crypto-pnl').textContent = (pnl >= 0 ? '+' : '') + '$' + Number(pnl).toLocaleString();
+          document.getElementById('crypto-pnl').style.color = pnl >= 0 ? '#22c55e' : '#ef4444';
+          document.getElementById('crypto-pnl-label').textContent = pnl >= 0 ? 'Profit' : 'Loss';
+        } else {
+          document.getElementById('crypto-pnl').textContent = '—';
+        }
+        document.getElementById('crypto-chains').textContent = p.chains || p.chainCount || tokens.length ? new Set(tokens.map(t => t.chain).filter(Boolean)).size || '—' : '—';
+
+        if (tokens.length) {
+          document.getElementById('crypto-tokens').textContent = tokens.length;
+          document.getElementById('crypto-table').innerHTML = tokens.map(t =>
+            `<tr><td>${t.symbol || t.token || t.asset || '—'}</td><td>${t.chain || '—'}</td><td>${t.balance || t.amount || t.quantity || '—'}</td><td>${t.value_usd || t.usdValue || t.value ? '$' + Number(t.value_usd || t.usdValue || t.value).toLocaleString() : '—'}</td></tr>`
+          ).join('');
+        } else {
+          document.getElementById('crypto-table').innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:hsl(var(--muted-foreground));">No portfolio data. Add your Bankr API key to .env.</td></tr>';
+        }
+      } catch(e) {
+        document.getElementById('crypto-total').textContent = '—';
+        document.getElementById('crypto-table').innerHTML = '<tr><td colspan="4" style="text-align:center;padding:20px;color:hsl(var(--muted-foreground));">Failed to load portfolio</td></tr>';
+      }
+    }
+
+    document.getElementById('crypto-search-btn').addEventListener('click', async () => {
+      const q = document.getElementById('crypto-search-input').value.trim();
+      if (!q) return;
+      document.getElementById('crypto-search-result').textContent = 'Searching...';
+      try {
+        const data = await fetch('/api/bankr/tokens?q=' + encodeURIComponent(q)).then(r => r.json());
+        if (data.error) {
+          document.getElementById('crypto-search-result').textContent = 'Bankr API unavailable. Add your API key to .env.';
+        } else if (data.tokens && data.tokens.length) {
+          document.getElementById('crypto-search-result').innerHTML = data.tokens.slice(0, 10).map(t =>
+            `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid hsla(var(--border),0.3);">
+              <span style="font-weight:600;">${t.symbol || t.name}</span>
+              <span>${t.price ? '$' + Number(t.price).toLocaleString() : '—'}</span>
+              <span style="color:${t.change24h >= 0 ? '#22c55e' : '#ef4444'}">${t.change24h ? (t.change24h >= 0 ? '+' : '') + t.change24h + '%' : '—'}</span>
+            </div>`
+          ).join('');
+        } else {
+          document.getElementById('crypto-search-result').textContent = 'No results for "' + q + '".';
+        }
+      } catch(e) { document.getElementById('crypto-search-result').textContent = 'Search failed.'; }
+    });
+
+    document.getElementById('crypto-search-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') document.getElementById('crypto-search-btn').click();
+    });
+
     document.querySelectorAll('.sidebar-nav a[data-page]').forEach(a => {
       a.addEventListener('click', e => {
         e.preventDefault();
@@ -793,9 +892,10 @@
         a.classList.add('active');
         document.querySelectorAll('.main-content > div[id^="page-"]').forEach(d => d.style.display = 'none');
         document.getElementById('page-' + a.dataset.page).style.display = 'block';
-        const titles = { overview: ['Dashboard', 'Real-time system overview'], services: ['Services', 'Service health and latency monitoring'], agents: ['Agents', 'AI agent runtime and performance'], maintenance: ['Maintenance', 'Log rotation & disk cleanup'], activity: ['Activity', 'Live event timeline'] };
+        const titles = { overview: ['Dashboard', 'Real-time system overview'], services: ['Services', 'Service health and latency monitoring'], agents: ['Agents', 'AI agent runtime and performance'], maintenance: ['Maintenance', 'Log rotation & disk cleanup'], activity: ['Activity', 'Live event timeline'], crypto: ['Crypto Treasury', 'Multi-chain portfolio powered by Bankr'] };
         document.getElementById('page-title').textContent = titles[a.dataset.page][0];
         document.getElementById('page-subtitle').textContent = titles[a.dataset.page][1];
+        if (a.dataset.page === 'crypto') loadCrypto();
       });
     });
 

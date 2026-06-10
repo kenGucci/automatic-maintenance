@@ -414,6 +414,31 @@ def api_agents():
         "average_success_rate": round(sum(a["success_rate"] for a in agents) / len(agents), 1),
     })
 
+# --- Bankr / Crypto Routes ---
+
+@app.route("/api/bankr/portfolio")
+def api_bankr_portfolio():
+    from bankr_client import get_portfolio, get_wallet_info
+    portfolio = get_portfolio()
+    info = get_wallet_info()
+    return jsonify({
+        "portfolio": portfolio or {"error": "Bankr API unavailable"},
+        "info": info or {"error": "Bankr API unavailable"},
+    })
+
+@app.route("/api/bankr/tokens")
+def api_bankr_tokens():
+    from bankr_client import search_tokens, get_token_info
+    q = request.args.get("q", "")
+    if q:
+        return jsonify(search_tokens(q) or {"error": "Bankr API unavailable"})
+    return jsonify({"tokens": []})
+
+@app.route("/api/bankr/credits")
+def api_bankr_credits():
+    from bankr_client import check_credits
+    return jsonify(check_credits() or {"error": "Bankr API unavailable"})
+
 # --- Pro Dashboard Routes ---
 
 @app.route("/dashboard/pro")

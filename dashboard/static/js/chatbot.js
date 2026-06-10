@@ -94,10 +94,15 @@ function localAnswer(query) {
 
   if (best && bestScore > 0.3) return best.answer;
 
+  { keywords: ['bankr', 'crypto', 'portfolio', 'wallet', 'treasury', 'balance', 'token', 'trade'], answer: 'AutoMend now integrates with Bankr — an AI-powered crypto trading agent. The Crypto Treasury panel in the dashboard shows your multi-chain portfolio, balances, PnL, and lets you search token prices. It uses the Bankr API (bankr.bot) for all data.' },
+  { keywords: ['bankr', 'what', 'is'], answer: 'Bankr is an AI-powered crypto trading and wallet agent. It supports Base, Ethereum, Polygon, Solana, and more. You can trade, swap, bridge, DCA, leverage trade, deploy tokens, and manage NFTs — all via natural language or API. AutoMend integrates it into the dashboard as a Crypto Treasury panel.' },
+  { keywords: ['bankr', 'setup', 'api', 'key', 'configure'], answer: 'To connect Bankr to AutoMend: add your Bankr API key to .env as BANKR_API_KEY=bk_usr_.... Then the Crypto Treasury panel in the dashboard will show your portfolio, balances, and token data automatically.' },
+  { keywords: ['bankr', 'trade', 'buy', 'sell', 'swap', 'dca'], answer: 'Bankr supports natural language trading: "Buy $100 of ETH on Base", "Swap 0.1 ETH for USDC", "DCA $50 into SOL every week", "Long BTC with 10x on Hyperliquid". It handles swaps, bridges, limit orders, stop losses, and more.' },
+
   const fallbacks = [
-    "I'm not sure I understand. I can answer questions about AutoMend, programming, technology, science, and general knowledge. Try rephrasing your question.",
-    "Hmm, I don't have an answer for that. Ask me about AutoMend, tech, programming, science, or just about anything else!",
-    "I couldn't find a match. Try asking: 'What is AutoMend?', 'Tell me about Python', 'How does AI work?', or 'Tell me a joke'."
+    "I'm not sure I understand. I can answer questions about AutoMend, crypto (via Bankr), programming, technology, science, and general knowledge. Try rephrasing your question.",
+    "Hmm, I don't have an answer for that. Ask me about AutoMend, Bankr crypto, tech, programming, science, or just about anything else!",
+    "I couldn't find a match. Try asking: 'What is AutoMend?', 'How does Bankr work?', 'Tell me about Python', or 'Tell me a joke'."
   ];
   return fallbacks[Math.floor(Math.random() * fallbacks.length)];
 }
