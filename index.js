@@ -55,7 +55,21 @@ async function bootstrap() {
     const apiServer = new AgentServer(agent);
     apiServer.start();
     logger.info(`🔌 Agent API server started on port ${apiServer.port}`);
-    
+
+    // Log remote hosts config
+    if (config.remoteHosts && config.remoteHosts.length > 0) {
+      logger.info(`🌐 Monitoring ${config.remoteHosts.length} remote host(s)`, {
+        hosts: config.remoteHosts.map(h => h.host),
+      });
+    }
+
+    // Log notification config
+    const notifier = new (require('./src/utils/Notifier'))(config.notification || {});
+    logger.info('📬 Notification channels', {
+      slack: !!config.notification?.slackWebhookUrl,
+      email: !!config.notification?.emailTo,
+    });
+
   } catch (error) {
     logger.error('❌ Failed to start Automatic Maintenance Agent', error);
     process.exit(1);
@@ -73,20 +87,6 @@ process.on('SIGTERM', () => {
   logger.info('⏹️  Shutting down Automatic Maintenance Agent...');
   if (agent) agent.stop();
   process.exit(0);
-});
-
-    // Log remote hosts config
-if (config.remoteHosts && config.remoteHosts.length > 0) {
-  logger.info(`🌐 Monitoring ${config.remoteHosts.length} remote host(s)`, {
-    hosts: config.remoteHosts.map(h => h.host),
-  });
-}
-
-// Log notification config
-const notifier = new (require('./src/utils/Notifier'))(config.notification || {});
-logger.info('📬 Notification channels', {
-  slack: !!config.notification?.slackWebhookUrl,
-  email: !!config.notification?.emailTo,
 });
 
 // Start the application

@@ -297,12 +297,13 @@ def chat_page():
 def api_chat():
     data = request.get_json(silent=True) or {}
     question = data.get("question", "")
-    if not question:
-        return jsonify({"error": "question is required"}), 400
+    image_b64 = data.get("image", "")
+    if not question and not image_b64:
+        return jsonify({"error": "question or image is required"}), 400
 
     # Try live agent first
     agent = _try_agent('/api/health')
-    if agent:
+    if agent and not image_b64:
         try:
             from urllib.request import Request, urlopen
             req = Request(
@@ -325,9 +326,39 @@ def api_chat():
             b = _bucket()
             metrics = _generate_metrics(b)
             alerts = _generate_alerts(b)
-            prompt = f"""You are an expert systems engineer. Answer the user's question based on the current system data.
 
-Current metrics:
+            content = []
+            system_prompt = "You are an expert systems engineer and AI ops assistant for AutoMend."
+
+            has_image = bool(image_b64)
+            context_intro = ""
+
+            if has_image:
+                system_prompt += " You can analyze images, screenshots, and diagrams."
+                context_intro = "The user has also uploaded an image."
+
+                import re
+                img_match = re.match(r'data:image/(\w+);base64,(.+)', image_b64)
+                if img_match:
+                    media_type = f"image/{img_match.group(1)}"
+                    img_data = img_match.group(2)
+                else:
+                    media_type = "image/png"
+                    img_data = image_b64
+
+                content.append({
+                    "type": "image",
+                    "source": {
+                        "type": "base64",
+                        "media_type": media_type,
+                        "data": img_data,
+                    }
+                })
+
+            if question:
+                user_msg = f"""{context_intro}
+
+Current system metrics:
 {json.dumps(metrics, indent=2)}
 
 Recent alerts:
@@ -336,11 +367,28 @@ Recent alerts:
 User question: {question}
 
 Answer concisely based on the data."""
+            else:
+                user_msg = f"""{context_intro}
+
+Current system metrics:
+{json.dumps(metrics, indent=2)}
+
+Recent alerts:
+{json.dumps(alerts[:5], indent=2)}
+
+The user uploaded an image. Please analyze it and describe what you see. If it relates to system monitoring or infrastructure, provide insights."""
+
+            content.append({
+                "type": "text",
+                "text": user_msg,
+            })
+
             response = client.messages.create(
                 model=os.environ.get("CLAUDE_MODEL", "claude-sonnet-4-20250514"),
-                max_tokens=800,
+                max_tokens=1000,
                 temperature=0.3,
-                messages=[{"role": "user", "content": prompt}],
+                system=system_prompt,
+                messages=[{"role": "user", "content": content}],
             )
             return jsonify({
                 "question": question,
@@ -351,7 +399,10 @@ Answer concisely based on the data."""
         except Exception as e:
             return jsonify({"error": f"Claude unavailable: {e}"}), 500
 
-    return jsonify({"error": "No Claude backend available. Set ANTHROPIC_API_KEY or start the agent."}), 400
+    if image_b64:
+        return jsonify({"answer": "Image received! To enable AI image analysis, set ANTHROPIC_API_KEY in your .env file."}), 200
+
+    return jsonify({"answer": "I'm running in fallback mode. For full AI responses, start the live agent or set ANTHROPIC_API_KEY. Your question was noted though!"}), 200
 
 
 @app.route("/api/actions")

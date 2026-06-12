@@ -1,11 +1,11 @@
 ---
 name: bankr
-description: AI-powered crypto trading agent, wallet API, and LLM gateway via natural language. Use when the user wants to trade crypto, check portfolio balances (with PnL and NFTs), view token prices, search tokens, transfer crypto, manage NFTs, use leverage (Hyperliquid or Avantis), bet on Polymarket, deploy tokens, set up automated trading, sign and submit raw transactions, call or deploy x402 paid API endpoints, browse the web, or access LLM models through the Bankr LLM gateway funded by your Bankr wallet. Supports Base, Ethereum, Polygon, Solana, Unichain, World Chain, Arbitrum, and BNB Chain.
+description: AI-powered crypto trading agent, wallet API, and LLM gateway via natural language. Use when the user wants to trade crypto, check portfolio balances and PnL, search tokens, transfer funds, manage NFTs, use leverage, bet on Polymarket, deploy tokens, or access LLM models through Bankr. Supports Base, Ethereum, Polygon, Solana, Unichain, World Chain, Arbitrum, and BNB Chain.
+license: MIT
+compatibility: opencode
 metadata:
-  clawdbot:
-    emoji: "📺"
-    homepage: "https://bankr.bot"
-    requires: { "bins": ["bankr"] }
+  homepage: https://bankr.bot
+  chains: "base,ethereum,polygon,solana,unichain,worldchain,arbitrum,bnb"
 ---
 
 # Bankr
